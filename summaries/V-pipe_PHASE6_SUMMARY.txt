@@ -1,0 +1,29 @@
+WORKFLOW:        V-pipe
+DATE:            2026-03-27
+WMS:             snakemake (v7.32.4 via dedicated conda env)
+ENV_TYPE:        conda (prefix under runs/V-pipe/env/conda)
+SLURM:           partition=compute, nodes=4, ~47759 MiB/node
+DARSHAN:         log dir $WORKFLOW_ROOT/runs/V-pipe/small/darshan_logs/;
+                 2123 .darshan files (small scale)
+
+SMALL_SCALE:
+  input_path:    $WORKFLOW_ROOT/data/V-pipe/small/sars-cov-2/
+  input_size:    5.9M
+  elapsed_s:     1457
+  exit_code:     0
+  validation:    SUCCESS
+  repair_attempts: 2
+  output_files:  35 steps completed (100%)
+  output_size:   115M
+  patches_applied: Snakemake 7 conda env, PYTHONNOUSERSITE=1
+
+MEDIUM_SCALE:
+  validation:    SKIPPED (small succeeded, medium not attempted due to time)
+
+OVERALL_STATUS:  SMALL_ONLY
+NOTES:           Required Snakemake v7 (load_configfile removed in v8+).
+                 Installed Snakemake 7.32.4 in dedicated conda env.
+                 First attempt failed: system pandas imported via ~/.local.
+                 Fixed with PYTHONNOUSERSITE=1 to isolate conda env.
+                 SARS-CoV-2 test data: 2 samples, QA + SNV calling pipeline.
+                 All 35 Snakemake steps completed successfully.

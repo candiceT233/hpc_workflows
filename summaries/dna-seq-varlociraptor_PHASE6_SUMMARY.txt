@@ -1,0 +1,26 @@
+WORKFLOW:        dna-seq-varlociraptor
+DATE:            2026-03-26
+WMS:             snakemake
+ENV_TYPE:        venv (conda not available)
+
+SMALL_SCALE:
+  dry_run:         FAIL
+  exit_code:       1
+  validation:      FATAL
+  repair_attempts: 0
+  reason:          Dry-run fails with pandas ValueError: "Update not allowed with
+                   duplicate indexes on other" in common.smk line 66. This is a
+                   pandas version incompatibility (pandas 3.0.1 vs expected older
+                   version). Even if resolved, execution would require conda for
+                   bioinformatics tools (BWA, varlociraptor, samtools, etc.).
+
+MEDIUM_SCALE:
+  validation:      SKIPPED
+
+OVERALL_STATUS:  BOTH_FAILED
+NOTES:           Snakemake wrapper-based workflow requiring conda environments.
+                 Conda/mamba not available on this system.
+                 Dry-run fails due to pandas API incompatibility (v3.0 breaking change).
+                 Tools required but missing: BWA, varlociraptor, samtools, bcftools,
+                 GATK, trimmomatic/fastp, VEP, datavzrd, freebayes.
+                 113 wrapper/conda directives across 22 rule files.

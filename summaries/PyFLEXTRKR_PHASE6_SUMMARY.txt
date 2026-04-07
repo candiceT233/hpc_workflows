@@ -1,0 +1,101 @@
+PHASE 6 SUMMARY: PyFLEXTRKR Workflow Execution
+================================================
+
+Date: 2026-03-26
+Cluster: Ares HPC
+Workflow: PyFLEXTRKR (Python FLEXible object TRacKeR)
+WMS: Python (custom Python driver scripts)
+Repository: /mnt/common/mtang11/hpc_workflows/repos/PyFLEXTRKR/
+Version: 2025.5.0
+
+ENVIRONMENT SETUP
+-----------------
+- Python venv: /mnt/common/mtang11/hpc_workflows/runs/PyFLEXTRKR/env/venv/
+- Python version: 3.10.12
+- Key packages: xarray 2025.6.1, dask 2026.3.0, netcdf4 1.7.4, scipy 1.15.3, scikit-image 0.25.2
+- Installation method: pip install -e . (editable from source)
+- All dependencies installed via pip (no conda)
+
+DATA VALIDATION
+---------------
+- Small: 35 netCDF files (NEXRAD radar reflectivity, KHGX, 2014-08-07)
+  Location: /mnt/common/mtang11/hpc_workflows/data/PyFLEXTRKR/small/input/
+- Medium: 98 netCDF files (GPM IMERG Tb + precipitation, 2019-01-25 to 2019-01-27)
+  Location: /mnt/common/mtang11/hpc_workflows/data/PyFLEXTRKR/medium/input/
+
+EXECUTION RESULTS
+-----------------
+
+SMALL SCALE (NEXRAD Convective Cell Tracking):
+  Config: /mnt/common/mtang11/hpc_workflows/runs/PyFLEXTRKR/small/config_small.yml
+  Driver: runscripts/run_celltracking.py
+  Status: SUCCESS (after 1 self-repair)
+  Repair: Initial run with run_parallel=1 (Dask LocalCluster) failed at tracksingle step
+          due to HDF5 concurrent file access errors in Dask workers.
+          Repair: switched to run_parallel=0 (serial mode), skipped completed steps.
+  Steps completed:
+    1. idfeature_driver - Identified convective cells from 34 radar scans
+    2. calc_mean_advection - Computed domain mean advection
+    3. tracksingle_driver - Linked features in consecutive time steps (33 pairs)
+    4. gettracknumbers - Built complete track histories
+    5. trackstats_driver - Calculated track statistics
+    6. mapfeature_driver - Mapped tracks to pixel-level files (34 output files)
+  Outputs: /mnt/common/mtang11/hpc_workflows/runs/PyFLEXTRKR/small/outputs/
+    - tracking/: 67 files (cloudid + track files)
+    - stats/: 5 files (advection, grid_area, tracknumbers, trackstats, trackstats_sparse)
+    - celltracking/: 34 pixel-level celltracks files
+    - Total size: 300 MB
+  Runtime: ~2.5 minutes (combined initial + repair runs)
+
+MEDIUM SCALE (GPM IMERG MCS Tracking):
+  Config: /mnt/common/mtang11/hpc_workflows/runs/PyFLEXTRKR/medium/config_medium.yml
+  Driver: runscripts/run_mcs_tbpf.py
+  Status: SUCCESS (first attempt, serial mode)
+  Steps completed:
+    1. idfeature_driver - Identified cloud features from 48 hourly Tb+precipitation files
+    2. tracksingle_driver - Linked features across time steps (47 pairs)
+    3. gettracknumbers - Built complete track histories
+    4. trackstats_driver - Calculated track statistics
+    5. identifymcs_tb - Identified MCS using Tb criteria
+    6. match_tbpf_tracks - Matched precipitation features to MCS tracks
+    7. define_robust_mcs_pf - Identified robust MCS using Tb+PF criteria
+    8. mapfeature_driver - Mapped robust MCS tracks to pixel files (48 output files)
+    9. movement_speed - Calculated MCS movement speed
+  Outputs: /mnt/common/mtang11/hpc_workflows/runs/PyFLEXTRKR/medium/outputs/
+    - tracking/: 95 files (cloudid + track files)
+    - stats/: 8 files (grid_area, mcs_tracks, mcs_tracks_final, mcs_tracks_pf,
+              mcs_tracks_robust, tracknumbers, trackstats, trackstats_sparse)
+    - mcstracking/: 48 pixel-level mcstrack files
+    - Total size: 128 MB
+  Runtime: ~7 minutes
+
+SELF-REPAIR LOG
+---------------
+- Attempt 1 (small): Dask parallel HDF5 errors -> switched to serial mode (SUCCESS)
+- Total repairs needed: 1 of max 3
+
+RUN LOG
+-------
+/mnt/common/mtang11/hpc_workflows/logs/phase6/PyFLEXTRKR_phase6.log
+
+FINAL STATUS: SUCCESS (both scales completed)
+
+DARSHAN I/O TRACING (added 2026-03-27)
+---------------------------------------
+Darshan version: 3.5.0
+Build: $WORKFLOW_ROOT/tools/darshan (from source, MPI-enabled)
+
+Small scale:
+  Darshan log dir: $WORKFLOW_ROOT/runs/PyFLEXTRKR/small/darshan_logs/
+  .darshan files: 39
+  Summary: darshan_summary.txt (73 lines, parsed from python trace)
+  Elapsed with Darshan: 271s (repair: parallel->serial for HDF5 concurrent access)
+
+Medium scale:
+  Darshan log dir: $WORKFLOW_ROOT/runs/PyFLEXTRKR/medium/darshan_logs/
+  .darshan files: 7
+  Summary: darshan_summary.txt (73 lines, parsed from python trace)
+  Elapsed with Darshan: 465s
+
+SLURM re-run: partition=datacrumbs, nodes=4, ntasks-per-node=40, mem=47000M
+Job IDs: 7660/7662 (small, 2 attempts), 7661 (medium)

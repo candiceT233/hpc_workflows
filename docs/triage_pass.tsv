@@ -1,0 +1,21 @@
+repo_name	criterion_a_reason	data_status	data_source_hint
+1000genome-workflow	Pegasus DAX with 5+ stages (Individuals,Sifting,Merge,Overlap,Frequency)	PUBLIC	ftp://ftp.1000genomes.ebi.ac.uk
+PyFLEXTRKR	6 sequential steps (idfeature,advection,tracksingle,gettracks,trackstats,mapfeature)	PUBLIC	https://portal.nersc.gov/project/m1867/PyFLEXTRKR/sample_data/
+DeepDriveMD-pipeline	5 stages via RADICAL-EnTK (MD,Aggregation,ML,ModelSelection,Agent)	PUBLIC	data/bba/ bundled in repo
+Montage	Multi-step mosaic (reproject,overlap,bgmatch,coadd)	PUBLIC	Public astronomical archives via mArchiveDownload
+biobb_wf_md_setup	10+ sequential MD setup steps in notebook	PUBLIC	PDB 1AKI from Protein Data Bank
+nf-core_rnaseq	16+ Nextflow steps (QC,trim,align,quant,report)	PUBLIC	nf-core/test-datasets on GitHub
+nf-core_sarek	Multi-step variant calling (QC,trim,align,call,annotate)	PUBLIC	nf-core/test-datasets
+nf-core_eager	aDNA pipeline (adapt_removal,mapping,damage_profiling,dedup)	PUBLIC	nf-core/test-datasets
+nf-core_viralrecon	7+ stages (QC,trim,align,variant_call,assembly,report)	PUBLIC	nf-core/test-datasets
+nf-core_chipseq	7+ stages (QC,trim,align,dedup,peak_call,annotate)	PUBLIC	nf-core/test-datasets + GEO
+nf-core_atacseq	8+ stages (QC,trim,align,filter,peak_call,annotate)	PUBLIC	nf-core/test-datasets
+nf-core_mag	Assembly+binning pipeline (QC,trim,assemble,bin,quality)	PUBLIC	nf-core/test-datasets
+nf-core_ampliseq	Amplicon pipeline (QC,trim,DADA2,taxonomy,diversity)	PUBLIC	nf-core/test-datasets
+rna-seq-star-deseq2	6 rule modules (ref,trim,qc,align,diffexp)	PUBLIC	Bundled test data + SRA config
+dna-seq-gatk-variant-calling	8 rule modules (ref,mapping,calling,filtering,annotation)	PUBLIC	Bundled test data + GATK bundle
+dna-seq-varlociraptor	20+ rule modules for variant calling	PUBLIC	Bundled test FASTQ + SRA config
+chipseq	11 rule modules (cutadapt,mapping,filtering,peak_analysis)	PUBLIC	Bundled test data in .test/data/
+metaGEM	20+ steps (fastp,megahit,concoct,metabat,carveme,smetana)	PUBLIC	downloadToy rule with public URLs
+V-pipe	20 rule modules for viral NGS analysis	PUBLIC	Bundled test data + tutorial data
+iwc	Galaxy workflows spanning multiple domains	PUBLIC	Galaxy test data definitions

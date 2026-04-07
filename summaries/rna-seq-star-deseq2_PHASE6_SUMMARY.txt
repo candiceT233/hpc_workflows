@@ -1,0 +1,26 @@
+WORKFLOW:        rna-seq-star-deseq2
+DATE:            2026-03-26
+WMS:             snakemake
+ENV_TYPE:        venv (conda not available)
+
+SMALL_SCALE:
+  dry_run:         PASS (53 jobs planned)
+  exit_code:       1
+  validation:      FATAL
+  repair_attempts: 0
+  reason:          Wrapper execution failed: fastp not found (exit code 127).
+                   Snakemake wrappers require --use-conda to install bioinformatics
+                   tools into isolated conda environments. Without conda, the wrapper
+                   scripts execute but the underlying tools (fastp, STAR, samtools,
+                   DESeq2/R, multiqc, rseqc) are not available on PATH.
+
+MEDIUM_SCALE:
+  validation:      SKIPPED
+
+OVERALL_STATUS:  BOTH_FAILED
+NOTES:           Snakemake wrapper-based workflow requiring conda environments.
+                 Conda/mamba not available on this system.
+                 Tools required but missing: fastp, STAR, samtools, DESeq2 (R),
+                 multiqc, rseqc, subread (featureCounts).
+                 Dry-run succeeds (53 jobs). Execution fails at first rule (fastp_pe)
+                 because fastp binary is not installed.

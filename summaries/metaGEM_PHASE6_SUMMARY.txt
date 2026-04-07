@@ -1,0 +1,28 @@
+WORKFLOW:        metaGEM
+DATE:            2026-03-27
+WMS:             snakemake (v9.18.2)
+ENV_TYPE:        conda (prefix under runs/metaGEM/small/workdir/envs/metagem)
+SLURM:           partition=compute, nodes=4, ~47759 MiB/node
+DARSHAN:         log dir $WORKFLOW_ROOT/runs/metaGEM/small/darshan_logs/;
+                 143 .darshan files (small scale)
+
+SMALL_SCALE:
+  input_path:    $WORKFLOW_ROOT/data/metaGEM/small/
+  input_size:    1.8G
+  elapsed_s:     748
+  exit_code:     0
+  validation:    SUCCESS
+  repair_attempts: 3
+  output_files:  4 steps completed (100%): qfilter for 3 samples
+  output_size:   1.6G
+  patches_applied: Config paths fixed, Snakefile patched (source activate -> conda activate), fastp conda env created
+
+MEDIUM_SCALE:
+  validation:    SKIPPED (small succeeded, medium not attempted due to time)
+
+OVERALL_STATUS:  SMALL_ONLY
+NOTES:           Config had placeholder paths (/path/to/project/...) replaced with actual WORKFLOW_ROOT paths.
+                 Snakefile used 'source activate' (old conda API) - patched to use 'conda activate'.
+                 Created dedicated conda env with fastp for quality filtering.
+                 Default target rule is qfilter (fastp quality filtering on all samples).
+                 3 samples processed: sample1, sample2, sample3 (paired-end reads).

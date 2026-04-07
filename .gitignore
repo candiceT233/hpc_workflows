@@ -1,0 +1,70 @@
+# ============================================================
+# Large files and generated outputs - exclude from version control
+# ============================================================
+
+# --- Data files (52GB+, re-downloadable via scripts/download_inputs.sh) ---
+data/*/small/
+data/*/medium/
+data/**/*.fastq*
+data/**/*.fq*
+data/**/*.bam
+data/**/*.sam
+data/**/*.vcf*
+data/**/*.fasta*
+data/**/*.fa
+data/**/*.fa.*
+data/**/*.gtf
+data/**/*.gff*
+data/**/*.bed
+data/**/*.tar.gz
+data/**/*.gz
+data/**/*.tbi
+data/**/*.idx
+data/**/*.dict
+data/**/*.fai
+
+# --- Run outputs (29GB+, reproducible) ---
+runs/*/small/
+runs/*/medium/
+runs/*/env/
+runs/*/workdir*/
+runs/nf-core_shared/
+
+# --- Tools and build artifacts (4.2GB+) ---
+tools/
+
+# --- Archive repos (4.5GB, too large for submodules - documented only) ---
+archive/
+
+# --- Log files (large session logs) ---
+logs/claude_sessions/
+logs/phase6/*.log
+logs/clone_failures.log
+logs/darshan_build.log
+logs/darshan_setup.log
+
+# --- SLURM output files ---
+slurm-*.out
+
+# --- Python/Conda artifacts ---
+__pycache__/
+*.pyc
+*.pyo
+.eggs/
+*.egg-info/
+.venv/
+venv/
+*.egg
+
+# --- OS artifacts ---
+.DS_Store
+Thumbs.db
+
+# --- Temporary files ---
+*.tmp
+*.swp
+*.swo
+*~
+
+# --- Large git objects (if any leak through) ---
+*.pack

@@ -1,0 +1,26 @@
+WORKFLOW:        chipseq
+DATE:            2026-03-26
+WMS:             snakemake
+ENV_TYPE:        venv (conda not available)
+
+SMALL_SCALE:
+  dry_run:         PARTIAL (checkpoint-based DAG, 3 initial jobs)
+  exit_code:       1
+  validation:      FATAL
+  repair_attempts: 0
+  reason:          After initial checkpoint jobs succeed (generate_igenomes, get_gsize),
+                   the expanded DAG requires test input FASTQ files that are not present
+                   (resources/reads/a.chr21.1.fq etc.). MissingInputException at
+                   cutadapt_pe rule. Even with test data, execution would fail because
+                   wrappers require --use-conda for bioinformatics tools.
+
+MEDIUM_SCALE:
+  validation:      SKIPPED
+
+OVERALL_STATUS:  BOTH_FAILED
+NOTES:           Snakemake wrapper-based workflow requiring conda environments.
+                 Conda/mamba not available on this system.
+                 Tools required but missing: BWA, samtools, cutadapt, MACS2, deeptools,
+                 bamtools, multiqc, phantompeakqualtools, homer.
+                 60 wrapper/conda directives across 10 rule files.
+                 Test data files not present in .test/ directory.

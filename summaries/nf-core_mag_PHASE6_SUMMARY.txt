@@ -1,0 +1,21 @@
+WORKFLOW:        nf-core_mag
+DATE:            2026-03-26
+WMS:             nextflow (nf-core)
+ENV_TYPE:        N/A (no container/conda profile available)
+
+SMALL_SCALE:
+  input_path:    test profile (built-in URLs)
+  exit_code:     1
+  validation:    FATAL
+  repair_attempts: 2
+  reason:        Pipeline requires Nextflow >=25.04.2 (uses nf-schema plugin). System has Java 11 (openjdk 11.0.30) which only supports Nextflow <=23.10.x. Plugin nf-schema not available in Nextflow 23.x plugin registry. Even if version issue resolved, pipeline requires Docker/Singularity/Conda for tools: megahit, spades, bowtie2, samtools, maxbin2, metabat2, busco, quast, prokka, prodigal, cat, gtdbtk, etc.
+
+MEDIUM_SCALE:
+  validation:    SKIPPED
+
+OVERALL_STATUS:  BOTH_FAILED
+NOTES:           nf-core/mag v5.4.1 requires Nextflow >=25.04.2 which needs Java 17+.
+                 System only has Java 11 (openjdk 11.0.30). Two-layer incompatibility:
+                 (1) Java 11 -> max Nextflow 23.10.x -> missing nf-schema plugin
+                 (2) No Docker, Singularity, or Conda available for bioinformatics tools.
+                 Required tools: megahit, spades, bowtie2, samtools, maxbin2, metabat2, busco, quast, prokka, prodigal, cat, gtdbtk, checkm, centrifuge, kraken2, fastp, multiqc.

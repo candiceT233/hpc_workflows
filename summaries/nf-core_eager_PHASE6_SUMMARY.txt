@@ -1,0 +1,22 @@
+WORKFLOW:        nf-core_eager
+DATE:            2026-03-26
+WMS:             nextflow (nf-core)
+ENV_TYPE:        N/A (no container/conda profile available)
+
+SMALL_SCALE:
+  input_path:    test profile (built-in URLs)
+  exit_code:     1
+  validation:    FATAL
+  repair_attempts: 3
+  reason:        Pipeline uses DSL1, requires Nextflow <=22.10.x. With Nextflow 22.10.8 pipeline launches but fails with "No such file" error on HTTP URLs for test data (file() with checkIfExists cannot resolve remote URLs). With Nextflow 23.10.1, DSL1 is no longer supported. Even if data issue resolved, pipeline requires Docker/Singularity/Conda for tools: bwa, samtools, picard, adapterremoval, fastqc, qualimap, preseq, damageprofiler, mapdamage2, etc.
+
+MEDIUM_SCALE:
+  validation:    SKIPPED
+
+OVERALL_STATUS:  BOTH_FAILED
+NOTES:           nf-core/eager v2.5.3 uses DSL1 (requires NF <=22.10.x). NF 22.10.8 cannot
+                 resolve HTTP URLs via file() checkIfExists for test datasets.
+                 Two-layer incompatibility:
+                 (1) DSL1 pipeline locked to old Nextflow with URL resolution bugs
+                 (2) No Docker, Singularity, or Conda available for bioinformatics tools.
+                 Required tools: bwa, samtools, picard, adapterremoval, fastqc, qualimap, preseq, damageprofiler, mapdamage2, bedtools, sexdeterrmine, nuclear_contamination, mtnucratio, multiqc.

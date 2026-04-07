@@ -1,0 +1,25 @@
+WORKFLOW:        dna-seq-gatk-variant-calling
+DATE:            2026-03-26
+WMS:             snakemake
+ENV_TYPE:        venv (conda not available)
+
+SMALL_SCALE:
+  dry_run:         PASS (38 jobs planned)
+  exit_code:       1
+  validation:      FATAL
+  repair_attempts: 0
+  reason:          Wrapper source cache failure (git object parse error) when trying
+                   to fetch snakemake-wrappers from GitHub cache. Even if resolved,
+                   execution would fail because wrappers require --use-conda to install
+                   bioinformatics tools (BWA, GATK, samtools, trimmomatic, VEP, etc.).
+
+MEDIUM_SCALE:
+  validation:      SKIPPED
+
+OVERALL_STATUS:  BOTH_FAILED
+NOTES:           Snakemake wrapper-based workflow requiring conda environments.
+                 Conda/mamba not available on this system.
+                 Tools required but missing: BWA, GATK4, samtools, trimmomatic/fastp,
+                 picard, VEP (Ensembl Variant Effect Predictor), multiqc.
+                 Dry-run succeeds (38 jobs). Execution fails due to wrapper cache
+                 issue and fundamentally due to missing bioinformatics tools.

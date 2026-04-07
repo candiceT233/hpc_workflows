@@ -1,0 +1,17 @@
+WORKFLOW:        iwc
+DATE:            2026-03-26
+WMS:             galaxy
+ENV_TYPE:        N/A (Galaxy server required)
+
+SMALL_SCALE:
+  validation:    FATAL
+  reason:        Galaxy server not available on this HPC cluster
+
+MEDIUM_SCALE:
+  validation:    SKIPPED
+
+OVERALL_STATUS:  BOTH_FAILED
+NOTES:           Galaxy workflow definitions (.ga files) require a running Galaxy
+                 server instance. No Galaxy installation available. Cannot execute
+                 Galaxy workflows from CLI without planemo or a Galaxy API endpoint.
+                 Marking as FATAL - needs Galaxy server setup.

@@ -1,0 +1,15 @@
+diff --git a/workflow/rules/common.smk b/workflow/rules/common.smk
+index 86a734d..df4ccd3 100644
+--- a/workflow/rules/common.smk
++++ b/workflow/rules/common.smk
+@@ -63,7 +63,9 @@ samples["group"] = [_group_or_sample(row) for _, row in samples.iterrows()]
+ if "umi_read" not in samples.columns:
+     samples["umi_read"] = pd.NA
+ 
+-validate(samples, schema="../schemas/samples.schema.yaml")
++# Pandas 3.0 fix: reset index before validate to avoid duplicate index error in .update()
++_samples_for_validate = samples.reset_index(drop=True)
++validate(_samples_for_validate, schema="../schemas/samples.schema.yaml")
+ 
+ 
+ # Does this correctly return groups where fusion and variants are set?

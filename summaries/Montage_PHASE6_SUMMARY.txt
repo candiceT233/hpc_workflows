@@ -1,0 +1,63 @@
+PHASE6_SUMMARY: Montage
+=======================
+Date: 2026-03-27
+Workflow: Montage
+WMS: shell (C toolkit compiled from source + shell scripting)
+Cluster: Ares HPC
+
+COMPILATION
+-----------
+Status: SUCCESS
+Source: /mnt/common/mtang11/hpc_workflows/repos/Montage
+Binaries: /mnt/common/mtang11/hpc_workflows/repos/Montage/bin/
+
+EXECUTION RESULTS
+-----------------
+Scale   | Status  | Input Files | Overlaps | Output Size | Duration | Repair Attempts
+--------|---------|-------------|----------|-------------|----------|----------------
+small   | SUCCESS | 4 FITS      | 6        | 1.2 MB      | ~3s      | 0
+medium  | SUCCESS | 16 FITS     | 42       | 19 MB       | ~12s     | 0
+
+PIPELINE STEPS (all completed with stat="OK")
+----------------------------------------------
+1. mImgtbl     - Created image metadata table from raw FITS files
+2. mProjExec   - Reprojected all images to target frame (TAN, RA=275.2, DEC=-16.17)
+3. mImgtbl     - Re-catalogued projected images
+4. mOverlaps   - Identified overlapping image pairs
+5. mDiffExec   - Computed difference images for overlapping pairs
+6. mFitExec    - Fit planes to difference images
+7. mBgModel    - Modeled background corrections
+8. mBgExec     - Applied background corrections to projected images
+9. mImgtbl     - Re-catalogued corrected images
+10. mAdd       - Co-added corrected images into final mosaic
+
+OUTPUT FILES
+------------
+Small mosaic:  /mnt/common/mtang11/hpc_workflows/runs/Montage/small/outputs/mosaic.fits
+Medium mosaic: /mnt/common/mtang11/hpc_workflows/runs/Montage/medium/outputs/mosaic.fits
+
+Run logs:
+  /mnt/common/mtang11/hpc_workflows/runs/Montage/small/logs/montage_run.log
+  /mnt/common/mtang11/hpc_workflows/runs/Montage/medium/logs/montage_run.log
+
+OVERALL STATUS: SUCCESS
+
+DARSHAN I/O TRACING (added 2026-03-27)
+---------------------------------------
+Darshan version: 3.5.0
+Build: $WORKFLOW_ROOT/tools/darshan (from source, MPI-enabled)
+
+Small scale:
+  Darshan log dir: $WORKFLOW_ROOT/runs/Montage/small/darshan_logs/
+  .darshan files: 23
+  Summary: darshan_summary.txt (935 lines, parsed from mDiffExec trace)
+  Elapsed with Darshan: 174s
+
+Medium scale:
+  Darshan log dir: $WORKFLOW_ROOT/runs/Montage/medium/darshan_logs/
+  .darshan files: 23
+  Summary: darshan_summary.txt (3735 lines, parsed from mDiffExec trace)
+  Elapsed with Darshan: 182s
+
+SLURM re-run: partition=datacrumbs, nodes=4, ntasks-per-node=40, mem=47000M
+Job IDs: 7656 (small), 7657 (medium)

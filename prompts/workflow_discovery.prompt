@@ -1,0 +1,448 @@
+# HPC Workflow Terminal Agent Prompts
+## Five-phase pipeline for discovering, triaging, documenting, and running HPC scientific workflows
+
+This file lives in the **project repository root** (alongside `workflow_run.prompt`). Set:
+
+```bash
+export WORKFLOW_ROOT="<absolute path to this repository's root>"
+# Example on Ares: /mnt/common/mtang11/hpc_workflows
+```
+
+Use `$WORKFLOW_ROOT` for all paths below (do not assume `~/hpc_workflows`).
+
+### Ares cluster (this system — verified via `sinfo` / `scontrol`)
+
+- **Scheduler:** SLURM only (no PBS/Torque).
+- **Partitions:**
+  - **`datacrumbs`** — use for this benchmark suite; **MaxTime=2-00:00:00**, ~29 nodes (`ares-comp-[02-08,10-23,25-32]`).
+  - **`compute`** — site default (`*`); **MaxTime=2-00:00:00**, ~22 nodes; use only if `datacrumbs` is unavailable or the user directs.
+  - **`debug`** — **MaxTime=4-00:00:00**, ~6 nodes; suitable for short smoke tests.
+- **Node shape:** **40 CPUs** per node, **~47759 MiB RAM** (~46.6 GB) per node (`sinfo -o '%c %m'`).
+- **Darshan:** There is **no** `darshan` module in Lmod on Ares (`module avail darshan` is empty). Build runtime from source under `$WORKFLOW_ROOT/tools/darshan` (see Phase 5).
+- **Conda:** There is **no** cluster `module load conda`. User Miniconda exists at **`/mnt/common/mtang11/miniconda3`** and **`/home/mtang11/miniconda3`** (same install). Agents must `source $CONDA_ROOT/etc/profile.d/conda.sh` — `conda` is **not** on default `PATH` in non-interactive/batch shells. Prefer creating envs with **prefix under** `$WORKFLOW_ROOT/runs/<repo>/env/`.
+
+**Execution skip (Phase 5 / any benchmark run):** Do not execute the **1000genome-workflow**
+repo (`1000genome-workflow`); it may remain in the catalog for reference. All other listed
+workflows are in scope unless a later phase marks them FATAL.
+
+---
+
+## Phase 1 — Discover and clone publicly available workflows
+
+```
+You are a terminal agent running on a Linux system with internet access and standard HPC tools
+available (git, wget, curl, python3). Your task is to discover and clone publicly available
+scientific workflow codebases that are designed to run on HPC clusters.
+
+GOAL:
+Build a local catalog of HPC scientific workflow repositories by searching for known workflows
+and community registries, then cloning each repo.
+
+STEPS:
+
+1. Create a working directory structure under $WORKFLOW_ROOT:
+   mkdir -p $WORKFLOW_ROOT/{repos,archive,data,logs,papers,tools}
+
+2. Search the following sources for publicly available HPC scientific workflows. For each
+   source, extract repository URLs (prefer GitHub, but accept any public git host, Zenodo,
+   or GitLab):
+
+   a. nf-core registry:        https://nf-co.re/pipelines
+   b. Snakemake workflow catalog: https://snakemake.github.io/snakemake-workflow-catalog/
+   c. WorkflowHub:             https://workflowhub.eu/workflows
+   d. GitHub topic search:     https://github.com/topics/scientific-workflow
+   e. GitHub topic search:     https://github.com/topics/hpc-workflow
+   f. Common known workflows (always include these):
+      - 1000 Genomes:          https://github.com/pegasus-isi/1000genome-workflow
+      - PyFLEXTRKR:            https://github.com/FlexTRKR/PyFLEXTRKR
+      - DeepDriveMD (DDMD):    https://github.com/DeepDriveMD/DeepDriveMD-pipeline
+      - PtychoNN:              https://github.com/mcherukara/PtychoNN
+      - Montage:               https://github.com/Caltech-IPAC/Montage
+      - OpenFOAM-HPC:          https://develop.openfoam.com/Development/openfoam
+      - GROMACS workflows:     https://github.com/bioexcel/biobb_wf_md_setup
+      - LAMMPS examples:       https://github.com/lammps/lammps
+      - NWChem:                https://github.com/nwchemgit/nwchem
+      - NAMD:                  https://github.com/NAMD-HPC/NAMD-workflow
+      NOTE: Repo URLs last verified 2026-03-26. Re-check before cloning.
+
+3. For each discovered repository, record the following in $WORKFLOW_ROOT/logs/catalog.tsv:
+   repo_name  \t  repo_url  \t  source  \t  cloned_at
+
+4. Clone each repository into $WORKFLOW_ROOT/repos/<repo_name>/:
+   git clone --depth=1 <repo_url> $WORKFLOW_ROOT/repos/<repo_name>
+
+5. If a clone fails (private, removed, or requires auth), log the failure in
+   $WORKFLOW_ROOT/logs/clone_failures.log with the URL and error message. Do NOT skip
+   silently.
+
+6. After cloning, print a summary:
+   - Total repos cloned successfully
+   - Total failures
+   - Full path list of all successfully cloned repos
+
+Do not install or execute any code in this phase. Clone only.
+```
+
+---
+
+## Phase 2 — Triage repos: check for multi-step tasks and public input data
+
+```
+You are a terminal agent. You have a directory $WORKFLOW_ROOT/repos/ containing cloned
+scientific workflow repositories and a catalog at $WORKFLOW_ROOT/logs/catalog.tsv.
+
+GOAL:
+Evaluate each cloned repo to determine:
+  (A) Whether it contains at least two distinct computational steps or tasks (i.e. it is a
+      multi-step workflow, not a single script).
+  (B) Whether any required input data is documented and publicly downloadable.
+
+Workflows that fail criterion (A) OR require private/proprietary input data are moved to
+$WORKFLOW_ROOT/archive/ with a reason file.
+
+EVALUATION CRITERIA:
+
+For criterion A (multi-step workflow), look for any of the following signals:
+  - A DAG definition file (e.g. Pegasus DAX/YAML, Nextflow .nf, Snakemake Snakefile,
+    Parsl script, Swift/T script, CWL .cwl, WDL .wdl, Makefile with chained rules)
+  - At least two distinct scripts/executables that are called in sequence or in parallel
+    (look at README, workflow definition files, shell scripts, and config files)
+  - An explicit "steps", "stages", "tasks", or "rules" section with 2+ entries
+
+For criterion B (public input data), look for:
+  - Download scripts (download.sh, get_data.sh, fetch_inputs.py, etc.)
+  - Direct URLs to data (ftp://, https://, s3://, globus://) in README, config, or scripts
+  - Instructions referencing public repositories: NCBI SRA, EBI ENA, Zenodo, NCAR RDA,
+    NERSC portal, AWS Open Data, DOE data portals
+  - Data described as "generated" or "synthetic" with generation scripts included
+
+STEPS:
+
+1. For each repo in $WORKFLOW_ROOT/repos/:
+
+   a. Read: README.md (or README.rst, README.txt), any file matching *workflow*, *pipeline*,
+      *snakefile*, *nextflow*, *.cwl, *.wdl, *.nf, *.dax, *.yaml, *.yml in the repo root
+      and any immediate subdirectory.
+
+   b. Determine criterion A. Set STATUS_A = PASS or FAIL. Record reason (1 sentence).
+
+   c. Determine criterion B. Set STATUS_B = PUBLIC, PRIVATE, or UNKNOWN.
+      - PUBLIC: download URL or public repo reference found
+      - PRIVATE: explicit mention of restricted, controlled, or institutional-only data
+      - UNKNOWN: no data documentation found at all
+
+   d. If STATUS_A = FAIL OR STATUS_B = PRIVATE:
+      - Move the repo: mv $WORKFLOW_ROOT/repos/<repo_name> $WORKFLOW_ROOT/archive/<repo_name>
+      - Write $WORKFLOW_ROOT/archive/<repo_name>/TRIAGE_REASON.txt with:
+          REPO: <repo_name>
+          CRITERION_A: PASS or FAIL — <reason>
+          CRITERION_B: PUBLIC / PRIVATE / UNKNOWN — <reason>
+          DECISION: archived
+          DATE: <today>
+
+2. For repos that PASS both criteria, append a row to
+   $WORKFLOW_ROOT/logs/triage_pass.tsv:
+   repo_name \t criterion_a_reason \t data_status \t data_source_hint
+
+3. Print a final triage report:
+   - N repos passed (list names)
+   - N repos archived (list names + reason code)
+   - N repos with UNKNOWN data status but passing criterion A (flagged for manual review)
+```
+
+---
+
+## Phase 3 — Gather documentation: papers and project websites
+
+```
+You are a terminal agent with internet access, curl, wget, and python3 available. You have a
+list of workflows that passed triage in $WORKFLOW_ROOT/logs/triage_pass.tsv.
+
+GOAL:
+For each workflow that passed triage, find and download:
+  (a) The primary research paper describing the workflow (PDF preferred)
+  (b) The project website or documentation site URL
+
+STEPS:
+
+1. For each repo_name in $WORKFLOW_ROOT/logs/triage_pass.tsv:
+
+   a. Read the repo's README and any docs/ folder for paper citations, DOI links, arXiv
+      links, or project website URLs. Extract all found URLs.
+
+   b. Search for the paper using the following strategy (try in order, stop at first success):
+      i.  If a DOI is present: fetch https://doi.org/<DOI> to confirm, then download PDF
+          from the publisher or from Unpaywall: https://api.unpaywall.org/v2/<DOI>?email=researcher@hpc.edu
+      ii. If an arXiv ID is present: download from https://arxiv.org/pdf/<ID>.pdf
+      iii. Search Semantic Scholar:
+           https://api.semanticscholar.org/graph/v1/paper/search?query=<workflow_name>+HPC+workflow&fields=title,year,openAccessPdf,externalIds
+           Download the PDF if openAccessPdf.url is present.
+      iv. Search arXiv API:
+           https://export.arxiv.org/api/query?search_query=ti:<workflow_name>+AND+cat:cs.DC&max_results=3
+           Download the first matching PDF.
+
+   c. Save the PDF to $WORKFLOW_ROOT/papers/<repo_name>/<repo_name>_paper.pdf
+      If no open-access PDF is found, save a plain text file
+      $WORKFLOW_ROOT/papers/<repo_name>/NO_PDF_FOUND.txt with all found citation info
+      (title, authors, venue, DOI, abstract if available).
+
+   d. Find the project website:
+      - Check README for "homepage", "website", "documentation", "docs" links
+      - If a readthedocs.io, github.io, or official project URL is found, record it
+      - Save the URL to $WORKFLOW_ROOT/papers/<repo_name>/project_website.txt
+      - Optionally: wget --mirror -p --no-parent -l 1 <website_url> into
+        $WORKFLOW_ROOT/papers/<repo_name>/website_mirror/ (only if site is small, <50 pages)
+
+2. Append results to $WORKFLOW_ROOT/logs/paper_status.tsv:
+   repo_name \t paper_found(yes/no) \t pdf_path_or_NA \t paper_title \t doi_or_arxiv \t website_url
+
+3. Print a summary:
+   - N workflows with PDF found
+   - N workflows with citation info only (no open-access PDF)
+   - N workflows with no paper found
+```
+
+---
+
+## Phase 4 — Download and prepare input data
+
+```
+You are a terminal agent with internet access, wget, curl, and python3 available. You have:
+NOTE: aws-cli is NOT installed. For S3-hosted datasets, use direct HTTPS URLs or install
+aws-cli locally: pip install awscli --user
+  - $WORKFLOW_ROOT/repos/         (triaged workflow repos)
+  - $WORKFLOW_ROOT/logs/triage_pass.tsv  (list of passing workflows)
+  - $WORKFLOW_ROOT/papers/        (papers and docs per workflow)
+
+GOAL:
+For each passing workflow, find or construct input data download scripts and download
+at least two distinct input data scales (small and medium). All downloaded data must
+remain under 50 GB total per workflow. Do not download data larger than 50 GB.
+
+STEPS:
+
+1. For each repo in triage_pass.tsv:
+
+   a. Locate or construct a download script by checking (in order):
+      i.  Any existing script: download.sh, get_data.sh, fetch_data.py, data/download*,
+          scripts/download*, test/get_input*, or similar
+      ii. Instructions in README, docs/, or paper for dataset names and download commands
+      iii. Workflow config files referencing input paths — infer the dataset from those paths
+
+   b. Identify at least two data scales. Common patterns:
+      - "test" or "small" dataset: subset, chr1 only, toy example, first N samples
+      - "full" or "medium" dataset: complete chromosome, full sample set up to 50 GB cap
+      - Synthetic/generated: run any included data generation scripts at two different sizes
+        (e.g., N=100 and N=1000 samples, or grid size 128x128 vs 512x512)
+
+   c. Create the data directory:
+      mkdir -p $WORKFLOW_ROOT/data/<repo_name>/{small,medium}
+
+   d. Write a download script $WORKFLOW_ROOT/data/<repo_name>/download_inputs.sh that:
+      - Downloads the small-scale input to $WORKFLOW_ROOT/data/<repo_name>/small/
+      - Downloads the medium-scale input to $WORKFLOW_ROOT/data/<repo_name>/medium/
+      - Validates each download with a checksum if checksums are published
+      - Checks available disk space before downloading; aborts if <10 GB free
+      - Prints data size after each download (du -sh)
+      - Enforces the 50 GB cap: if the projected download exceeds 50 GB, truncate or
+        subset the dataset and document the truncation in a README_DATA.txt
+
+   e. Run the download script:
+      bash $WORKFLOW_ROOT/data/<repo_name>/download_inputs.sh 2>&1 | \
+        tee $WORKFLOW_ROOT/logs/<repo_name>_data_download.log
+
+   f. After download, write $WORKFLOW_ROOT/data/<repo_name>/README_DATA.txt containing:
+      - Dataset name and source URL
+      - Small-scale size (du -sh output) and description
+      - Medium-scale size (du -sh output) and description
+      - Any truncation or subsetting applied to stay under 50 GB
+      - Checksum validation result (pass/fail/skipped)
+
+2. Update $WORKFLOW_ROOT/logs/data_status.tsv:
+   repo_name \t small_path \t small_size \t medium_path \t medium_size \t download_status
+
+3. If a workflow has no publicly downloadable data after thorough search:
+   - Write $WORKFLOW_ROOT/data/<repo_name>/NO_DATA_FOUND.txt with investigation notes
+   - Mark the workflow as NEEDS_MANUAL_DATA in data_status.tsv
+   - Do NOT move to archive yet; flag for human review
+
+4. Print a summary:
+   - N workflows with both scales downloaded
+   - N workflows with small scale only
+   - N workflows needing manual data intervention
+   - Total disk used across all downloads
+```
+
+---
+
+## Phase 5 — Execute workflows at two input data scales (Ares SLURM, 4 nodes, Darshan)
+
+```
+You are a terminal agent on the Ares HPC cluster with the following available:
+  - SLURM only (see “Ares cluster” facts above: **datacrumbs** for benchmarks)
+  - Python 3.10, git, wget, curl, pegasus-plan
+  - Lmod module system with: adios, hdf5, mpich, mercury, orangefs, vpic-kokkos
+  - Standard node: **40 CPUs**, **~47759 MiB** RAM per node
+
+NOT pre-installed (must be installed per-workflow into local envs under $WORKFLOW_ROOT):
+  - Nextflow, Snakemake, Parsl, cwltool, miniwdl (install via pip, curl, or conda into a prefix under $WORKFLOW_ROOT/runs/<repo>/env/)
+  - **Conda:** use user Miniconda at `/mnt/common/mtang11/miniconda3` or `/home/mtang11/miniconda3` — `source .../etc/profile.d/conda.sh` (see “Ares cluster” above). Not on `PATH` by default in batch jobs.
+  - Singularity/Apptainer (no container runtime in module tree — verify with `module avail` if policy changes)
+  - Domain software: GROMACS, LAMMPS, NAMD, NWChem, OpenFOAM may be missing as modules —
+    workflows requiring these must build from source under $WORKFLOW_ROOT or be flagged
+
+You have:
+  - $WORKFLOW_ROOT/repos/          (workflow code, post-triage)
+  - $WORKFLOW_ROOT/data/<repo>/    (small/ and medium/ input datasets)
+  - $WORKFLOW_ROOT/logs/data_status.tsv
+
+**SKIP (do not execute):** If repo_name is `1000genome-workflow`, log SKIPPED in
+execution_results.tsv with reason and continue to the next repo.
+
+GOAL:
+Execute each other workflow at two input data scales (small and medium) under **SLURM**
+with a **4-node allocation** on Ares, record timing, resource usage, output correctness,
+and **Darshan I/O traces** for every run. Limits: input data ≤ 50 GB per workflow,
+wall time ≤ 4 hours per scale.
+
+DARSHAN (mandatory for every executed workflow):
+  1. One-time per $WORKFLOW_ROOT: on **Ares there is no Darshan module** — download a release
+     from https://github.com/hpc/darshan/releases and build with
+     --prefix=$WORKFLOW_ROOT/tools/darshan (document steps in $WORKFLOW_ROOT/logs/darshan_setup.log).
+  2. Test: run a trivial POSIX I/O command with LD_PRELOAD pointing at libdarshan.so and
+     confirm a .darshan log file is produced (see Darshan runtime docs). Record the exact
+     lib path and any required LD_LIBRARY_PATH in $WORKFLOW_ROOT/logs/darshan_setup.log.
+  3. For each workflow execution, set Darshan environment (e.g. DARSHAN_LOG_DIR or the
+     variable your Darshan version uses) to:
+     $WORKFLOW_ROOT/runs/<repo_name>/<scale>/darshan_logs/
+     Preload libdarshan.so for the **main** process (and child processes inherit). After
+     the run, list generated *.darshan files and optionally run darshan-job-summary.pl (or
+     darshan-parser) and save text summaries under the same darshan_logs/ tree.
+
+STEPS:
+
+1. For each repo_name with download_status = SUCCESS in data_status.tsv:
+
+   a. If repo_name is `1000genome-workflow`, skip execution (see SKIP above).
+
+   b. Inspect the repo to determine the execution method:
+      - Nextflow:   check for main.nf or nextflow.config
+      - Snakemake:  check for Snakefile
+      - Pegasus:    check for *.dax or pegasus.properties
+      - Parsl:      check for parsl_config.py or parsl in requirements
+      - Shell DAG:  check for run.sh, submit.sh, or Makefile
+      - Python driver: check for workflow.py, run_workflow.py
+
+   c. Create run directories:
+      mkdir -p $WORKFLOW_ROOT/runs/<repo_name>/{small,medium}/{logs,outputs,darshan_logs}
+
+   d. Write a run configuration for each scale that points inputs to the correct data path
+      and enables **multi-node SLURM** where the WMS supports it:
+      - Nextflow: params file + executor slurm; configure so processes can use the 4-node
+        allocation (e.g. process.executor, queue, clusterOptions for partition datacrumbs).
+      - Snakemake: cluster or SLURM profile with --nodes=4 / multi-node aware executor
+      - Pegasus: site catalog for SLURM, 4 nodes in the resource request
+      - Shell/Python: prefer `sbatch` with 4 nodes; export INPUT_DIR / OUTPUT_DIR
+
+   e. Construct a SLURM batch script. **Always request 4 nodes** for the benchmark (unless
+      the workflow README explicitly forbids multi-node — then document exception in NOTES):
+
+      #!/bin/bash
+      #SBATCH --job-name=<repo_name>_<scale>
+      #SBATCH --partition=datacrumbs
+      # When writing the real script, substitute WORKFLOW_ROOT with its absolute path — SLURM
+      # may not expand variables in #SBATCH lines on all systems.
+      #SBATCH --output=<ABS_WORKFLOW_ROOT>/runs/<repo_name>/<scale>/logs/slurm_%j.out
+      #SBATCH --error=<ABS_WORKFLOW_ROOT>/runs/<repo_name>/<scale>/logs/slurm_%j.err
+      #SBATCH --time=04:00:00
+      #SBATCH --nodes=4
+      #SBATCH --ntasks-per-node=40
+      #SBATCH --mem=47000M
+      # (Ares nodes report ~47759 MiB; 47000M is safe. Adjust if job rejected.)
+      # Total: 4 nodes × 40 cores — configure the WMS to spread tasks across this allocation.
+
+      module load <needed_modules> 2>/dev/null || true
+      export WORKFLOW_ROOT=<ABS_WORKFLOW_ROOT>
+      # Darshan — set lib path from darshan_setup.log; example:
+      # export LD_PRELOAD=$WORKFLOW_ROOT/tools/darshan/lib/libdarshan.so
+      # export DARSHAN_LOG_DIR=$WORKFLOW_ROOT/runs/<repo_name>/<scale>/darshan_logs/
+      mkdir -p "$DARSHAN_LOG_DIR"
+
+      cd $WORKFLOW_ROOT/repos/<repo_name>
+      START=$(date +%s)
+
+      <workflow_execution_command with Darshan-instrumented environment>
+
+      EXIT_CODE=$?
+      END=$(date +%s)
+      echo "ELAPSED: $((END - START)) seconds" >> \
+        $WORKFLOW_ROOT/runs/<repo_name>/<scale>/logs/timing.log
+      echo "EXIT_CODE: $EXIT_CODE"            >> \
+        $WORKFLOW_ROOT/runs/<repo_name>/<scale>/logs/timing.log
+
+   f. Submit both scales via `sbatch` to SLURM (partition datacrumbs), small then medium,
+      and poll with `squeue -j <job_id>` until completion. If you must run interactively on
+      an already-allocated 4-node session, mirror the same env (4-node srun/salloc context,
+      Darshan preload) and still enforce `timeout 14400`.
+
+   g. After each run: validate outputs (non-empty, exit code), scan logs for errors, list
+      Darshan logs under darshan_logs/, record file count and du -sh for outputs.
+
+2. Write a run summary file $WORKFLOW_ROOT/runs/<repo_name>/RUN_SUMMARY.txt:
+   WORKFLOW: <repo_name>
+   SLURM: nodes=4, partition=datacrumbs
+   DARSHAN: log directory paths, count of .darshan files, summary tool output path (if any)
+   SMALL_SCALE: (same fields as before)
+   MEDIUM_SCALE: (same fields as before)
+   NOTES: <any warnings, module load issues, config changes made>
+
+3. Append to $WORKFLOW_ROOT/logs/execution_results.tsv:
+   repo_name \t scale \t input_size \t wall_time_s \t exit_code \t output_size \t status \t darshan_log_count
+
+4. If a workflow fails at the small scale, do NOT attempt the medium scale. Log the failure
+   and move on to the next workflow. Do not retry more than once without human review.
+
+5. Print a final execution report across all workflows:
+   - N workflows: both scales succeeded
+   - N workflows: small succeeded, medium failed or not attempted
+   - N workflows: both scales failed
+   - N workflows: skipped (1000genome-workflow)
+   - Slowest workflow (by wall time) at each scale
+   - Total compute time across all runs
+```
+
+---
+
+## Directory layout reference
+
+```
+$WORKFLOW_ROOT/
+├── repos/                        # active (triaged) workflow repos
+│   └── <repo_name>/
+├── archive/                      # repos that failed triage
+│   └── <repo_name>/
+│       └── TRIAGE_REASON.txt
+├── data/                         # input datasets
+│   └── <repo_name>/
+│       ├── small/
+│       ├── medium/
+│       ├── download_inputs.sh
+│       └── README_DATA.txt
+├── papers/                       # papers and docs
+│   └── <repo_name>/
+│       ├── <repo_name>_paper.pdf (or NO_PDF_FOUND.txt)
+│       └── project_website.txt
+├── tools/                        # e.g. Darshan install prefix: tools/darshan/
+├── runs/                         # execution artifacts
+│   └── <repo_name>/
+│       ├── small/{logs/,outputs/,darshan_logs/}
+│       ├── medium/{logs/,outputs/,darshan_logs/}
+│       └── RUN_SUMMARY.txt
+└── logs/                         # cross-workflow tracking
+    ├── catalog.tsv
+    ├── clone_failures.log
+    ├── triage_pass.tsv
+    ├── paper_status.tsv
+    ├── data_status.tsv
+    └── execution_results.tsv
+```

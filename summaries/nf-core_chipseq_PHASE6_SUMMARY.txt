@@ -1,0 +1,23 @@
+WORKFLOW:        nf-core_chipseq
+DATE:            2026-03-26
+WMS:             nextflow (nf-core)
+ENV_TYPE:        N/A (no container/conda profile available)
+
+SMALL_SCALE:
+  input_path:    test profile (built-in URLs)
+  exit_code:     1
+  validation:    FATAL
+  repair_attempts: 3
+  reason:        Pipeline launches with Nextflow 23.10.1 and nf-validation@1.1.3 plugin (manually installed). However, nf-validation file existence check cannot resolve HTTP URLs for test input files (--input, --fasta, --gtf). Error: "the file or directory 'https://...' does not exist." Even if data resolved locally, pipeline requires Docker/Singularity/Conda for tools: bwa, samtools, picard, macs2, homer, deeptools, phantompeakqualtools, trimgalore, fastqc, multiqc, etc.
+
+MEDIUM_SCALE:
+  validation:    SKIPPED
+
+OVERALL_STATUS:  BOTH_FAILED
+NOTES:           nf-core/chipseq v2.1.0 requires NF >=23.04.0. Launches with NF 23.10.1
+                 after manual nf-validation plugin installation. Fails because nf-validation
+                 plugin in NF 23.x cannot resolve HTTP URLs for test data file existence checks.
+                 Two-layer incompatibility:
+                 (1) NF 23.x nf-validation plugin cannot validate remote URLs as file paths
+                 (2) No Docker, Singularity, or Conda available for bioinformatics tools.
+                 Required tools: bwa, samtools, picard, macs2, homer, deeptools, phantompeakqualtools, trimgalore, fastqc, multiqc, preseq, bedtools, ucsc-bedgraphtobigwig.
