@@ -68,3 +68,6 @@ Thumbs.db
 
 # --- Large git objects (if any leak through) ---
 *.pack
+
+# --- ASA upload clone (separate repo, not part of hpc_workflows) ---
+upload-asa/
