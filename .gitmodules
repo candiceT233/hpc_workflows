@@ -4,51 +4,21 @@
 [submodule "repos/biobb_wf_md_setup"]
 	path = repos/biobb_wf_md_setup
 	url = https://github.com/bioexcel/biobb_wf_md_setup
-[submodule "repos/chipseq"]
-	path = repos/chipseq
-	url = https://github.com/snakemake-workflows/chipseq
 [submodule "repos/DeepDriveMD-pipeline"]
 	path = repos/DeepDriveMD-pipeline
 	url = https://github.com/DeepDriveMD/DeepDriveMD-pipeline
-[submodule "repos/dna-seq-gatk-variant-calling"]
-	path = repos/dna-seq-gatk-variant-calling
-	url = https://github.com/snakemake-workflows/dna-seq-gatk-variant-calling
-[submodule "repos/dna-seq-varlociraptor"]
-	path = repos/dna-seq-varlociraptor
-	url = https://github.com/snakemake-workflows/dna-seq-varlociraptor
-[submodule "repos/iwc"]
-	path = repos/iwc
-	url = https://github.com/galaxyproject/iwc
 [submodule "repos/metaGEM"]
 	path = repos/metaGEM
 	url = https://github.com/franciscozorrilla/metaGEM
 [submodule "repos/Montage"]
 	path = repos/Montage
 	url = https://github.com/Caltech-IPAC/Montage
-[submodule "repos/nf-core_ampliseq"]
-	path = repos/nf-core_ampliseq
-	url = https://github.com/nf-core/ampliseq
-[submodule "repos/nf-core_atacseq"]
-	path = repos/nf-core_atacseq
-	url = https://github.com/nf-core/atacseq
-[submodule "repos/nf-core_chipseq"]
-	path = repos/nf-core_chipseq
-	url = https://github.com/nf-core/chipseq
-[submodule "repos/nf-core_eager"]
-	path = repos/nf-core_eager
-	url = https://github.com/nf-core/eager
 [submodule "repos/nf-core_mag"]
 	path = repos/nf-core_mag
 	url = https://github.com/nf-core/mag
 [submodule "repos/nf-core_rnaseq"]
 	path = repos/nf-core_rnaseq
 	url = https://github.com/nf-core/rnaseq
-[submodule "repos/nf-core_sarek"]
-	path = repos/nf-core_sarek
-	url = https://github.com/nf-core/sarek
-[submodule "repos/nf-core_viralrecon"]
-	path = repos/nf-core_viralrecon
-	url = https://github.com/nf-core/viralrecon
 [submodule "repos/PyFLEXTRKR"]
 	path = repos/PyFLEXTRKR
 	url = https://github.com/FlexTRKR/PyFLEXTRKR
@@ -58,3 +28,33 @@
 [submodule "repos/V-pipe"]
 	path = repos/V-pipe
 	url = https://github.com/cbg-ethz/V-pipe
+[submodule "repos/nf-core_bacass"]
+	path = repos/nf-core_bacass
+	url = https://github.com/nf-core/bacass
+[submodule "repos/nf-core_cutandrun"]
+	path = repos/nf-core_cutandrun
+	url = https://github.com/nf-core/cutandrun
+[submodule "repos/nf-core_demultiplex"]
+	path = repos/nf-core_demultiplex
+	url = https://github.com/nf-core/demultiplex
+[submodule "repos/nf-core_differentialabundance"]
+	path = repos/nf-core_differentialabundance
+	url = https://github.com/nf-core/differentialabundance
+[submodule "repos/nf-core_fetchngs"]
+	path = repos/nf-core_fetchngs
+	url = https://github.com/nf-core/fetchngs
+[submodule "repos/nf-core_hic"]
+	path = repos/nf-core_hic
+	url = https://github.com/nf-core/hic
+[submodule "repos/nf-core_methylseq"]
+	path = repos/nf-core_methylseq
+	url = https://github.com/nf-core/methylseq
+[submodule "repos/nf-core_scrnaseq"]
+	path = repos/nf-core_scrnaseq
+	url = https://github.com/nf-core/scrnaseq
+[submodule "repos/nf-core_smrnaseq"]
+	path = repos/nf-core_smrnaseq
+	url = https://github.com/nf-core/smrnaseq
+[submodule "repos/nf-core_taxprofiler"]
+	path = repos/nf-core_taxprofiler
+	url = https://github.com/nf-core/taxprofiler
