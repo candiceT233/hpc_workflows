@@ -71,3 +71,4 @@ Thumbs.db
 
 # --- ASA upload clone (separate repo, not part of hpc_workflows) ---
 upload-asa/
+.claude/settings.local.json

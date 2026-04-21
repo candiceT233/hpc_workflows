@@ -288,6 +288,29 @@ Resource constraints (enforce these in all generated configs):
                 NOTES and fall back to 1 node with explicit justification.
   Wall time:    4 hours per scale per workflow (hard limit; timeout 14400)
 
+  HEAD-NODE EXECUTION CONTEXT:
+    The agent itself runs on the Ares head/login node. Workflow execution must be **submitted
+    via sbatch** (or `srun` from inside a salloc) to compute nodes — never run the workflow
+    body directly on the head node beyond lightweight orchestration (Nextflow head process,
+    Snakemake driver, Python launchers).
+
+  MULTI-NODE VALIDATION REQUIREMENT (mandatory for every workflow):
+    Every workflow MUST be validated on **at least 2 nodes**, and **on 4 nodes whenever the
+    workflow's structure allows it** (i.e. has independent tasks, shardable inputs, or an
+    MPI/Dask/SSH-fanout multi-node mode). Specifically:
+      - If the workflow has a docker-compose multi-node service set (head + worker[s])
+        in `upload-asa/<workflow>/`, that fan-out pattern MUST be translated into a
+        SLURM-allocation script (sbatch --nodes=N + srun --exclusive --nodes=1 --ntasks=1
+        per shard, OR an MPI/Dask multi-node launcher) and executed on Ares.
+      - If the workflow uses Nextflow/Snakemake, configure the SLURM executor so child tasks
+        spread across the multi-node allocation.
+      - Strictly serial workflows with no shardable axis can stop at 2-node validation
+        (one node ↔ one independent replica) — document the cap in NOTES.
+    Record per-node-count results (1n / 2n / 4n) in `logs/multinode_sweep.tsv` (cols:
+    pipeline, nodes, exit_code, elapsed_s, output_size, job_id) AND in PHASE6_SUMMARY.txt
+    NOTES. A workflow is not considered fully validated until at least the 2-node run has
+    EXIT 0 with non-trivial outputs.
+
 3a. Verify data directories exist and are non-empty:
     [[ -d $WORKFLOW_ROOT/data/<repo_name>/small  && \
        $(ls $WORKFLOW_ROOT/data/<repo_name>/small | wc -l) -gt 0 ]] || {

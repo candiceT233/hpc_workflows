@@ -1,0 +1,17 @@
+pipeline	nodes	exit_code	elapsed_s	output_size	job_id
+nf-core_fetchngs	1	0	442	942M	7991
+nf-core_fetchngs	2	0	332	943M	7992
+nf-core_fetchngs	4	0	361	943M	8036
+nf-core_smrnaseq	1	1	237	17M	8077_FAIL_seqcluster_pkg_resources
+nf-core_methylseq	1	0	566	42M	8078
+Montage	4	0	6	19M	8079
+Montage	2	0	13	19M	8081
+nf-core_methylseq	2	0	217	40M	8082
+nf-core_methylseq	4	0	216	40M	8120
+biobb_wf_md_setup	2	0	12	-	8159 (8/8 PDB PASS)
+biobb_wf_md_setup	4	0	12	-	8158 (8/8 PDB PASS)
+V-pipe	2	0	1415	-	8167 (2/2 replicas PASS, conda-frontend conda fix)
+rna-seq-star-deseq2	2	0	1334	-	8174 (2/2 PASS, isolated CONDA_PKGS_DIRS fix)
+metaGEM	2	1	8	-	8173_FAIL_envs-metagem-not-in-fresh-workdir
+DeepDriveMD-pipeline	2	1	3	-	8175_FAIL_yaml_config_hardcoded_dir+RabbitMQ
+V-pipe	4	1	canceled_after_3700s	partial	8172 (1/4 PASS, 2/4 srun fail, 1/4 stuck — 4-replica contention; 2n still works)

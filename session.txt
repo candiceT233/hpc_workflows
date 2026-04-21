@@ -1,0 +1,7 @@
+Resume this session with:
+claude --resume 88334c27-0957-466e-8f48-a10845edf5e1
+
+
+-- inside upload-asa
+Resume this session with:
+claude --resume 8744554f-840e-4f39-baef-3912625fb354

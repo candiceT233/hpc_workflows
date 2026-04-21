@@ -1,0 +1,21 @@
+repo_name	paper_found	pdf_path_or_NA	paper_title	doi_or_arxiv	website_url
+1000genome-workflow	no	NA	NA (Pegasus benchmark workflow)	10.1016/j.future.2014.10.008	https://pegasus.isi.edu/
+PyFLEXTRKR	yes	papers/PyFLEXTRKR/PyFLEXTRKR_paper.pdf	PyFLEXTRKR: a flexible feature tracking Python software	10.5194/gmd-16-2753-2023	https://github.com/FlexTRKR/PyFLEXTRKR
+DeepDriveMD-pipeline	yes	papers/DeepDriveMD-pipeline/DeepDriveMD-pipeline_paper.pdf	DeepDriveMD: Deep-Learning Driven Adaptive Molecular Simulations	arXiv:1909.07817	https://deepdrivemd.github.io/
+Montage	yes	papers/Montage/Montage_paper.pdf	Montage: grid portal and toolkit for astronomical image mosaicking	arXiv:1005.4454	http://montage.ipac.caltech.edu
+biobb_wf_md_setup	yes	papers/biobb_wf_md_setup/biobb_wf_md_setup_paper.pdf	BioExcel Building Blocks software library	10.1038/s41597-019-0177-4	https://mmb.irbbarcelona.org/biobb/
+nf-core_rnaseq	no	NA	NA (Zenodo archive only)	10.5281/zenodo.1400710	https://nf-co.re/rnaseq
+nf-core_sarek	yes	papers/nf-core_sarek/nf-core_sarek_paper.pdf	Sarek: portable workflow for WGS analysis	10.12688/f1000research.16665.2	https://nf-co.re/sarek
+nf-core_eager	no	NA	Reproducible ancient genome reconstruction with nf-core/eager	10.7717/peerj.10947	https://nf-co.re/eager
+nf-core_viralrecon	no	NA	NA (Zenodo archive only)	10.5281/zenodo.3901628	https://nf-co.re/viralrecon
+nf-core_chipseq	no	NA	NA (Zenodo archive only)	10.5281/zenodo.3240506	https://nf-co.re/chipseq
+nf-core_atacseq	no	NA	NA (Zenodo archive only)	10.5281/zenodo.2634132	https://nf-co.re/atacseq
+nf-core_mag	no	NA	nf-core/mag best-practice pipeline for metagenome assembly	10.1093/nargab/lqac007	https://nf-co.re/mag
+nf-core_ampliseq	yes	papers/nf-core_ampliseq/nf-core_ampliseq_paper.pdf	Interpretations of Environmental Microbial Community Studies	10.3389/fmicb.2020.550420	https://nf-co.re/ampliseq
+rna-seq-star-deseq2	no	NA	NA (workflow only)	10.5281/zenodo.4737358	https://snakemake.github.io/snakemake-workflow-catalog/
+dna-seq-gatk-variant-calling	no	NA	NA (workflow only)	NA	https://snakemake.github.io/snakemake-workflow-catalog/
+dna-seq-varlociraptor	yes	papers/dna-seq-varlociraptor/dna-seq-varlociraptor_paper.pdf	Varlociraptor: enhancing sensitivity in somatic indel discovery	10.1186/s13059-020-01993-6	https://varlociraptor.github.io
+chipseq	no	NA	NA	NA	NA
+metaGEM	yes	papers/metaGEM/metaGEM_paper.pdf	metaGEM: reconstruction of genome scale metabolic models	10.1093/nar/gkab815	https://github.com/franciscozorrilla/metaGEM
+V-pipe	yes	papers/V-pipe/V-pipe_paper.pdf	V-pipe 3.0: sustainable pipeline for viral genetic diversity	10.1101/2023.10.16.562462	https://cbg-ethz.github.io/V-pipe/
+iwc	no	NA	NA (community project)	NA	https://dockstore.org/organizations/iwc
