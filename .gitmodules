@@ -58,3 +58,78 @@
 [submodule "repos/nf-core_taxprofiler"]
 	path = repos/nf-core_taxprofiler
 	url = https://github.com/nf-core/taxprofiler
+[submodule "repos/chipseq"]
+	path = repos/chipseq
+	url = https://github.com/snakemake-workflows/chipseq
+[submodule "repos/dna-seq-gatk-variant-calling"]
+	path = repos/dna-seq-gatk-variant-calling
+	url = https://github.com/snakemake-workflows/dna-seq-gatk-variant-calling
+[submodule "repos/dna-seq-varlociraptor"]
+	path = repos/dna-seq-varlociraptor
+	url = https://github.com/snakemake-workflows/dna-seq-varlociraptor
+[submodule "repos/nf-core_airrflow"]
+	path = repos/nf-core_airrflow
+	url = https://github.com/nf-core/airrflow
+[submodule "repos/nf-core_ampliseq"]
+	path = repos/nf-core_ampliseq
+	url = https://github.com/nf-core/ampliseq
+[submodule "repos/nf-core_atacseq"]
+	path = repos/nf-core_atacseq
+	url = https://github.com/nf-core/atacseq
+[submodule "repos/nf-core_circdna"]
+	path = repos/nf-core_circdna
+	url = https://github.com/nf-core/circdna
+[submodule "repos/nf-core_clipseq"]
+	path = repos/nf-core_clipseq
+	url = https://github.com/nf-core/clipseq
+[submodule "repos/nf-core_createtaxdb"]
+	path = repos/nf-core_createtaxdb
+	url = https://github.com/nf-core/createtaxdb
+[submodule "repos/nf-core_deepvariant"]
+	path = repos/nf-core_deepvariant
+	url = https://github.com/nf-core/deepvariant
+[submodule "repos/nf-core_detaxizer"]
+	path = repos/nf-core_detaxizer
+	url = https://github.com/nf-core/detaxizer
+[submodule "repos/nf-core_dualrnaseq"]
+	path = repos/nf-core_dualrnaseq
+	url = https://github.com/nf-core/dualrnaseq
+[submodule "repos/nf-core_funcscan"]
+	path = repos/nf-core_funcscan
+	url = https://github.com/nf-core/funcscan
+[submodule "repos/nf-core_genomeqc"]
+	path = repos/nf-core_genomeqc
+	url = https://github.com/nf-core/genomeqc
+[submodule "repos/nf-core_mhcquant"]
+	path = repos/nf-core_mhcquant
+	url = https://github.com/nf-core/mhcquant
+[submodule "repos/nf-core_nascent"]
+	path = repos/nf-core_nascent
+	url = https://github.com/nf-core/nascent
+[submodule "repos/nf-core_pathogensurveillance"]
+	path = repos/nf-core_pathogensurveillance
+	url = https://github.com/nf-core/pathogensurveillance
+[submodule "repos/nf-core_proteinfold"]
+	path = repos/nf-core_proteinfold
+	url = https://github.com/nf-core/proteinfold
+[submodule "repos/nf-core_quantms"]
+	path = repos/nf-core_quantms
+	url = https://github.com/nf-core/quantms
+[submodule "repos/nf-core_sarek"]
+	path = repos/nf-core_sarek
+	url = https://github.com/nf-core/sarek
+[submodule "repos/nf-core_scnanoseq"]
+	path = repos/nf-core_scnanoseq
+	url = https://github.com/nf-core/scnanoseq
+[submodule "repos/nf-core_spatialvi"]
+	path = repos/nf-core_spatialvi
+	url = https://github.com/nf-core/spatialvi
+[submodule "repos/nf-core_tumourevo"]
+	path = repos/nf-core_tumourevo
+	url = https://github.com/nf-core/tumourevo
+[submodule "repos/nf-core_viralintegration"]
+	path = repos/nf-core_viralintegration
+	url = https://github.com/nf-core/viralintegration
+[submodule "repos/nf-core_viralrecon"]
+	path = repos/nf-core_viralrecon
+	url = https://github.com/nf-core/viralrecon

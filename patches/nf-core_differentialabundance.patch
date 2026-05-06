@@ -1,0 +1,97 @@
+From: claude-code-loop-agent
+Date: 2026-04-21
+Subject: [PATCH] nf-core_differentialabundance: use ${moduleDir} for conda env paths
+
+Six module main.nf files in nf-core/differentialabundance use a hard-coded
+relative path for their conda directive:
+    conda 'modules/nf-core/<tool>/environment.yml'
+This breaks when Nextflow runs from a work directory outside the repo root
+(the standard nf-core execution model): "Conda environment file does not
+exist: modules/nf-core/gunzip/environment.yml".
+
+Fix: switch to the `${moduleDir}` variable which resolves to the module's
+own directory regardless of invocation cwd. This is the pattern used by
+every other nf-core module I've inspected (rnaseq, methylseq, smrnaseq).
+
+Affected modules:
+ - modules/nf-core/custom/tabulartogseagct/main.nf
+ - modules/nf-core/geoquery/getgeo/main.nf
+ - modules/nf-core/gunzip/main.nf
+ - modules/nf-core/rmarkdownnotebook/main.nf
+ - modules/nf-core/untar/main.nf
+ - modules/nf-core/zip/main.nf
+
+Verified on Ares 2026-04-21: before patch, pipeline crashed at GUNZIP_GTF
+in ~5s; after patch, pipeline advances past gunzip stage.
+
+Backups at `<file>.orig.pre-mtang-patch` next to each modified file.
+
+To upstream: PR at https://github.com/nf-core/differentialabundance against
+each of the six module files.
+
+--- modules/nf-core/custom/tabulartogseagct/main.nf.orig.pre-mtang-patch	2026-04-21 18:31:22.639052484 -0500
++++ modules/nf-core/custom/tabulartogseagct/main.nf	2026-04-21 18:31:22.667052514 -0500
+@@ -2,7 +2,7 @@
+     tag "$meta.id"
+     label 'process_single'
+ 
+-    conda 'modules/nf-core/custom/tabulartogseagct/environment.yml'
++    conda "${moduleDir}/environment.yml"
+     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+         'https://depot.galaxyproject.org/singularity/ubuntu:20.04' :
+         'nf-core/ubuntu:20.04' }"
+--- modules/nf-core/geoquery/getgeo/main.nf.orig.pre-mtang-patch	2026-04-21 18:31:22.683052531 -0500
++++ modules/nf-core/geoquery/getgeo/main.nf	2026-04-21 18:31:22.719052571 -0500
+@@ -2,7 +2,7 @@
+     tag "$meta.id"
+     label 'process_single'
+ 
+-    conda 'modules/nf-core/geoquery/getgeo/environment.yml'
++    conda "${moduleDir}/environment.yml"
+     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+         'https://depot.galaxyproject.org/singularity/bioconductor-geoquery:2.66.0--r42hdfd78af_0' :
+         'biocontainers/bioconductor-geoquery:2.66.0--r42hdfd78af_0' }"
+--- modules/nf-core/gunzip/main.nf.orig.pre-mtang-patch	2026-04-21 18:31:22.731052584 -0500
++++ modules/nf-core/gunzip/main.nf	2026-04-21 18:31:22.763052618 -0500
+@@ -2,7 +2,7 @@
+     tag "$archive"
+     label 'process_single'
+ 
+-    conda 'modules/nf-core/gunzip/environment.yml'
++    conda "${moduleDir}/environment.yml"
+     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+         'https://depot.galaxyproject.org/singularity/ubuntu:20.04' :
+         'nf-core/ubuntu:20.04' }"
+--- modules/nf-core/rmarkdownnotebook/main.nf.orig.pre-mtang-patch	2026-04-21 18:31:22.775052631 -0500
++++ modules/nf-core/rmarkdownnotebook/main.nf	2026-04-21 18:31:22.811052669 -0500
+@@ -7,7 +7,7 @@
+     //NB: You likely want to override this with a container containing all required
+     //dependencies for your analysis. The container at least needs to contain the
+     //yaml and rmarkdown R packages.
+-    conda 'modules/nf-core/rmarkdownnotebook/environment.yml'
++    conda "${moduleDir}/environment.yml"
+     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+         'https://depot.galaxyproject.org/singularity/mulled-v2-31ad840d814d356e5f98030a4ee308a16db64ec5:0e852a1e4063fdcbe3f254ac2c7469747a60e361-0' :
+         'biocontainers/mulled-v2-31ad840d814d356e5f98030a4ee308a16db64ec5:0e852a1e4063fdcbe3f254ac2c7469747a60e361-0' }"
+--- modules/nf-core/untar/main.nf.orig.pre-mtang-patch	2026-04-21 18:31:22.827052687 -0500
++++ modules/nf-core/untar/main.nf	2026-04-21 18:31:22.863052726 -0500
+@@ -2,7 +2,7 @@
+     tag "$archive"
+     label 'process_single'
+ 
+-    conda 'modules/nf-core/untar/environment.yml'
++    conda "${moduleDir}/environment.yml"
+     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+         'https://depot.galaxyproject.org/singularity/ubuntu:20.04' :
+         'nf-core/ubuntu:20.04' }"
+--- modules/nf-core/zip/main.nf.orig.pre-mtang-patch	2026-04-21 18:31:22.875052739 -0500
++++ modules/nf-core/zip/main.nf	2026-04-21 18:31:22.903052769 -0500
+@@ -2,7 +2,7 @@
+     tag "$prefix"
+     label 'process_single'
+ 
+-    conda 'modules/nf-core/zip/environment.yml'
++    conda "${moduleDir}/environment.yml"
+     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+         'https://depot.galaxyproject.org/singularity/p7zip:16.02' :
+         'biocontainers/p7zip:16.02' }"

@@ -13,3 +13,19 @@ index 86a734d..df4ccd3 100644
  
  
  # Does this correctly return groups where fusion and variants are set?
+
+=== Additional hunk (added 2026-04-22 by claude-code-loop-agent): ===
+# mapping.smk:207 had nested same-char quotes inside an f-string that old Python
+# parsers rejected. Rewritten to use single quotes inside the f-string.
+
+--- /mnt/common/mtang11/hpc_workflows/repos/dna-seq-varlociraptor/workflow/rules/mapping.smk.orig.pre-mtang-patch	2026-04-22 00:22:53.101578966 -0500
++++ /mnt/common/mtang11/hpc_workflows/repos/dna-seq-varlociraptor/workflow/rules/mapping.smk	2026-04-22 00:22:53.133579001 -0500
+@@ -204,7 +204,7 @@
+         temp("results/consensus/{sample}.consensus.{read_type}.mapped.bam"),
+     params:
+         index=lambda w, input: os.path.splitext(input.idx[0])[0],
+-        extra=lambda w: f"-C {get_read_group("-R")(w)}",
++        extra=lambda w: f"-C {get_read_group('-R')(w)}",
+         sort="samtools",
+         sort_order="coordinate",
+     wildcard_constraints:

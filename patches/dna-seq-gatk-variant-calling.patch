@@ -1,0 +1,20 @@
+From: claude-code-loop-agent
+Date: 2026-04-22
+Subject: [PATCH] dna-seq-gatk-variant-calling: replace deprecated pandas squeeze=True
+
+rules/common.smk:44 calls pd.read_table(..., squeeze=True), but the
+squeeze keyword was removed in pandas 2.x. Replace with .squeeze() method.
+
+To upstream: PR at https://github.com/snakemake-workflows/dna-seq-gatk-variant-calling
+
+--- /mnt/common/mtang11/hpc_workflows/repos/dna-seq-gatk-variant-calling/workflow/rules/common.smk.orig.pre-mtang-patch	2026-04-22 00:22:53.049578911 -0500
++++ /mnt/common/mtang11/hpc_workflows/repos/dna-seq-gatk-variant-calling/workflow/rules/common.smk	2026-04-22 00:22:53.093578958 -0500
+@@ -41,7 +41,7 @@
+ # contigs in reference genome
+ def get_contigs():
+     with checkpoints.genome_faidx.get().output[0].open() as fai:
+-        return pd.read_table(fai, header=None, usecols=[0], squeeze=True, dtype=str)
++        return pd.read_table(fai, header=None, usecols=[0], dtype=str).squeeze()
+ 
+ 
+ def get_fastq(wildcards):

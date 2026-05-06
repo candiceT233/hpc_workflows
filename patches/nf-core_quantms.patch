@@ -1,0 +1,63 @@
+From: claude-code-loop-agent
+Date: 2026-04-21
+Subject: [PATCH] nf-core_quantms: fix pre-25.x DSL2 'optional true' syntax
+
+Three module main.nf files use the pre-Nextflow-25.x DSL2 syntax
+'path "X" optional true' / 'emit: foo optional true' which fails in 25.x
+with 'Cannot invoke method optional() on null object'.
+Fix: add comma + colon to match modern syntax.
+
+Affected files:
+ - modules/local/msstats/main.nf
+ - modules/local/msstatstmt/main.nf
+ - modules/local/openms/proteomicslfq/main.nf
+
+To upstream: PR at https://github.com/nf-core/quantms
+
+--- /mnt/common/mtang11/hpc_workflows/repos/nf-core_quantms/modules/local/msstats/main.nf.orig.pre-mtang-patch	2026-04-21 22:44:57.559422671 -0500
++++ /mnt/common/mtang11/hpc_workflows/repos/nf-core_quantms/modules/local/msstats/main.nf	2026-04-21 22:44:57.599422712 -0500
+@@ -15,7 +15,7 @@
+     output:
+     // The generation of the PDFs from MSstats are very unstable, especially with auto-contrasts.
+     // And users can easily fix anything based on the csv and the included script -> make optional
+-    path "*.pdf" optional true
++    path "*.pdf", optional: true
+     path "*.csv", emit: msstats_csv
+     path "*.log", emit: log
+     path "versions.yml" , emit: version
+--- /mnt/common/mtang11/hpc_workflows/repos/nf-core_quantms/modules/local/msstatstmt/main.nf.orig.pre-mtang-patch	2026-04-21 22:44:57.607422720 -0500
++++ /mnt/common/mtang11/hpc_workflows/repos/nf-core_quantms/modules/local/msstatstmt/main.nf	2026-04-21 22:44:57.647422761 -0500
+@@ -15,7 +15,7 @@
+     output:
+     // The generation of the PDFs from MSstatsTMT are very unstable, especially with auto-contrasts.
+     // And users can easily fix anything based on the csv and the included script -> make optional
+-    path "*.pdf" optional true
++    path "*.pdf", optional: true
+     path "*.csv", emit: msstats_csv
+     path "*.log"
+     path "versions.yml" , emit: version
+--- /mnt/common/mtang11/hpc_workflows/repos/nf-core_quantms/modules/local/openms/proteomicslfq/main.nf.orig.pre-mtang-patch	2026-04-21 22:44:57.659422774 -0500
++++ /mnt/common/mtang11/hpc_workflows/repos/nf-core_quantms/modules/local/openms/proteomicslfq/main.nf	2026-04-21 22:44:57.695422811 -0500
+@@ -17,14 +17,14 @@
+     output:
+     path "${expdes.baseName}_openms.mzTab", emit: out_mztab
+     path "${expdes.baseName}_openms.consensusXML", emit: out_consensusXML
+-    path "*msstats_in.csv", emit: out_msstats optional true
+-    path "*triqler_in.tsv", emit: out_triqler optional true
+-    path "debug_mergedIDs.idXML", emit: debug_mergedIDs optional true
+-    path "debug_mergedIDs_inference.idXML", emit: debug_mergedIDs_inference optional true
+-    path "debug_mergedIDsGreedyResolved.idXML", emit: debug_mergedIDsGreedyResolved optional true
+-    path "debug_mergedIDsGreedyResolvedFDR.idXML", emit: debug_mergedIDsGreedyResolvedFDR optional true
+-    path "debug_mergedIDsGreedyResolvedFDRFiltered.idXML", emit: debug_mergedIDsGreedyResolvedFDRFiltered optional true
+-    path "debug_mergedIDsFDRFilteredStrictlyUniqueResolved.idXML", emit: debug_mergedIDsFDRFilteredStrictlyUniqueResolved optional true
++    path "*msstats_in.csv", emit: out_msstats, optional: true
++    path "*triqler_in.tsv", emit: out_triqler, optional: true
++    path "debug_mergedIDs.idXML", emit: debug_mergedIDs, optional: true
++    path "debug_mergedIDs_inference.idXML", emit: debug_mergedIDs_inference, optional: true
++    path "debug_mergedIDsGreedyResolved.idXML", emit: debug_mergedIDsGreedyResolved, optional: true
++    path "debug_mergedIDsGreedyResolvedFDR.idXML", emit: debug_mergedIDsGreedyResolvedFDR, optional: true
++    path "debug_mergedIDsGreedyResolvedFDRFiltered.idXML", emit: debug_mergedIDsGreedyResolvedFDRFiltered, optional: true
++    path "debug_mergedIDsFDRFilteredStrictlyUniqueResolved.idXML", emit: debug_mergedIDsFDRFilteredStrictlyUniqueResolved, optional: true
+     path "*.log", emit: log
+     path "versions.yml", emit: version
+ 

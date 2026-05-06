@@ -1,0 +1,40 @@
+From: claude-code-loop-agent
+Date: 2026-04-21
+Subject: [PATCH] mirtop: decode bytes lines before join in do.py error path
+
+mirtop 0.4.30's libs/do.py:79 builds an error_msg by joining debug_stdout,
+which is a deque of lines read from subprocess.Popen.stdout (default bytes
+in Python 3). `"".join(bytes_list)` raises TypeError: sequence item 0:
+expected str instance, bytes found.
+
+This breaks nf-core/smrnaseq's MIRTOP_GFF/STATS/COUNTS/EXPORT processes
+whenever samtools sort exits non-zero (which it does on test data due to
+an unrelated bam indexing issue whose error message mirtop is trying to
+format). The upstream error-path format crash masks the real issue.
+
+Fix: decode bytes to str with errors="replace" before join. Mirrors the
+pattern used by stdlib subprocess.check_output when text=True is absent
+and callers need a string representation of captured bytes.
+
+Verified on Ares 2026-04-21 across 6 conda_cache envs with Python 3.10,
+3.11, and 3.12.
+
+Applied via: runs/nf-core_shared/conda_cache/env-*/lib/python*/
+              site-packages/mirtop/libs/do.py
+Backup:      site-packages/mirtop/libs/do.py.orig.pre-mtang-patch
+             (one copy; all envs hardlink to the same inode nlink=7)
+
+To upstream: file a PR at https://github.com/miRTop/mirtop
+             against mirtop/libs/do.py line 79.
+
+--- /mnt/common/mtang11/hpc_workflows/runs/nf-core_shared/conda_cache/env-2ec791992f67c095c8990f681e82a3c9/lib/python3.12/site-packages/mirtop/libs/do.py.orig.pre-mtang-patch	2025-04-08 11:24:38.660217523 -0500
++++ /mnt/common/mtang11/hpc_workflows/runs/nf-core_shared/conda_cache/env-2ec791992f67c095c8990f681e82a3c9/lib/python3.12/site-packages/mirtop/libs/do.py	2026-04-21 18:01:06.473121131 -0500
+@@ -76,7 +76,7 @@
+             if exitcode is not None and exitcode != 0:
+                 error_msg = " ".join(cmd) if not isinstance(cmd, six.string_types) else cmd
+                 error_msg += "\n"
+-                error_msg += "".join(debug_stdout)
++                error_msg += "".join(l.decode(errors="replace") if isinstance(l, bytes) else l for l in debug_stdout)
+                 s.communicate()
+                 s.stdout.close()
+                 raise subprocess.CalledProcessError(exitcode, error_msg)
