@@ -38,10 +38,13 @@ archive/
 
 # --- Log files (large session logs) ---
 logs/claude_sessions/
-logs/phase6/*.log
+logs/phase6/
 logs/clone_failures.log
 logs/darshan_build.log
 logs/darshan_setup.log
+
+# --- Reference papers (downloadable from upstream sources) ---
+papers/
 
 # --- SLURM output files ---
 slurm-*.out
