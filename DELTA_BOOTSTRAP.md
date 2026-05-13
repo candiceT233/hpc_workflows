@@ -284,6 +284,67 @@ Once Phase 4–5 pass:
 - **Container-only modules** (`airrflow`, `demultiplex`, `scrnaseq`, `viralintegration`): require Singularity/Apptainer. If Delta has Apptainer, these may work where they failed on Ares.
 - **LAMMPS Datalife FPE**: `runs/lammps/` had a libmonitor × LAMMPS interaction that crashed with FPE on Ares. Avoid LAMMPS for the bootstrap; debug interactively after.
 
+## 12.5 Delta-specific gotchas (recorded 2026-05-13)
+
+These are the divergences from Ares observed during the first port.
+Templates in `templates/delta/` already encode the workarounds.
+
+### Storage: do not use /projects/bekn
+
+The NSF taiga project quota for `/projects/bekn` (Lustre project id
+19485) is **500 G soft / 550 G hard with expired grace period**, used
+540 G. Writes there fail. Put everything (code, tools, data, runs)
+under `/scratch/bekn/mtang9/` (Lustre dltawork, 979 G free of 1.5 TB).
+
+### SLURM partition: prefer cpu-preempt for dev
+
+`cpu-preempt` has `TRESBillingWeights=CPU=500` vs `cpu`'s 1000 — half
+the SU rate. Trade-off is preemption (5 min grace before kill). For
+the dev/validation loop this is a major budget saver. Use `cpu` only
+when preemption mid-run would destroy too much state.
+
+Account name: `bekn-delta-cpu`. CPU partitions only — `bekn-delta-gpu`
+exists but is not used by WIDGET.
+
+### Apptainer is the container runtime, NOT Singularity
+
+Delta provides Apptainer 1.4.2 system-wide at `/usr/bin/apptainer`
+(NOT a module). Nextflow's `singularity` config section still works —
+Apptainer accepts the same CLI. But Nextflow's task wrapper calls
+`env -` then `singularity exec`, wiping host env vars (including
+LD_PRELOAD). See profiler injection note below.
+
+### Nextflow version: pin to 25.10.5
+
+Set `NXF_VER=25.10.5` in every script. Reasons:
+- 26.04+ has a stricter Groovy config parser that breaks nf-core
+  pipelines using `def varname = ...` at config top level
+  (observed on methylseq 2.7.0 and 4.2.0).
+- 24.10 LTS lacks the `nf-schema@2.5.1` plugin newer pipelines
+  require.
+
+### Profiler LD_PRELOAD must be injected by Apptainer, not the host
+
+The Ares pattern of setting `LD_PRELOAD=$LIB` in the SLURM wrapper
+does NOT work on Delta because Apptainer isolates the container env.
+Use Nextflow's `singularity.runOptions = '--env LD_PRELOAD=...'`
+plus `--bind /scratch/bekn/mtang9` so the host-built .so file is
+accessible from inside containers. See
+`templates/delta/datalife.nf.config` and
+`templates/delta/darshan.nf.config`.
+
+Do NOT set `LD_PRELOAD=$LIBMONITOR` on the host bash — it loads
+libmonitor into the Nextflow Java VM and SIGSEGVs.
+(`MONITOR_UNSET_LIB=1` prevents the crash but then no traces get
+collected because the preload is cleared before science tools spawn.)
+
+### Known issue: libmonitor.so glibc ABI mismatch (exit 127)
+
+Host libmonitor.so is built against RHEL 9.4 glibc 2.34. Some
+BioContainers (older Debian bases, glibc 2.31) refuse to load it and
+exit 127. Observed on methylseq 4.2.0 FASTQC container. Workarounds
+in `templates/delta/README.md`.
+
 ## 13. If you get stuck
 
 Files most useful for triage:

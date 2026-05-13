@@ -15,7 +15,7 @@
 ###############################################################################
 set -euo pipefail
 
-DATA_ROOT="/mnt/common/mtang11/hpc_workflows/data"
+DATA_ROOT="${DATA_ROOT:-/scratch/bekn/mtang9/data}"
 LOG="${DATA_ROOT}/download_inputs.log"
 > "$LOG"
 
@@ -384,6 +384,42 @@ download_ampliseq() {
 }
 
 ###############################################################################
+# 9. nf-core/methylseq
+###############################################################################
+download_methylseq() {
+    local S="$DATA_ROOT/nf-core_methylseq/small"
+    local M="$DATA_ROOT/nf-core_methylseq/medium"
+    mkdir -p "$S/fastq" "$S/reference" "$M/fastq" "$M/reference"
+    log "=== nf-core_methylseq: SMALL ==="
+
+    local MBASE="https://raw.githubusercontent.com/nf-core/test-datasets/methylseq"
+
+    # Samplesheet
+    dl "${MBASE}/samplesheet/samplesheet_test.csv" "$S/samplesheet_test.csv"
+
+    # FASTQ files (test profile uses Ecoli + SRR389222 subsets)
+    dl "${MBASE}/testdata/Ecoli_10K_methylated_R1.fastq.gz" "$S/fastq/Ecoli_10K_methylated_R1.fastq.gz"
+    dl "${MBASE}/testdata/Ecoli_10K_methylated_R2.fastq.gz" "$S/fastq/Ecoli_10K_methylated_R2.fastq.gz"
+    dl "${MBASE}/testdata/SRR389222_sub1.fastq.gz" "$S/fastq/SRR389222_sub1.fastq.gz"
+    dl "${MBASE}/testdata/SRR389222_sub2.fastq.gz" "$S/fastq/SRR389222_sub2.fastq.gz"
+    dl "${MBASE}/testdata/SRR389222_sub3.fastq.gz" "$S/fastq/SRR389222_sub3.fastq.gz"
+
+    # Reference (E. coli genome.fa and gene annotation)
+    dl "${MBASE}/reference/genome.fa" "$S/reference/genome.fa"
+    dl "${MBASE}/reference/genome.fa.fai" "$S/reference/genome.fa.fai"
+
+    log "=== nf-core_methylseq: MEDIUM ==="
+    dl "${MBASE}/samplesheet/samplesheet_paired.csv" "$M/samplesheet_paired.csv"
+    replicate_small_to_medium "$S/fastq" "$M/fastq"
+    # Copy reference for medium scale
+    for f in "$S/reference"/*; do
+        [[ -f "$f" ]] || continue
+        local bname; bname=$(basename "$f")
+        [[ -f "$M/reference/$bname" ]] || cp "$f" "$M/reference/$bname"
+    done
+}
+
+###############################################################################
 # Main
 ###############################################################################
 PIPELINE="${1:-all}"
@@ -397,6 +433,7 @@ case "$PIPELINE" in
     nf-core_atacseq|atacseq)   download_atacseq ;;
     nf-core_mag|mag)           download_mag ;;
     nf-core_ampliseq|ampliseq) download_ampliseq ;;
+    nf-core_methylseq|methylseq) download_methylseq ;;
     all)
         download_rnaseq
         download_sarek
@@ -406,16 +443,17 @@ case "$PIPELINE" in
         download_atacseq
         download_mag
         download_ampliseq
+        download_methylseq
         ;;
     *)
         echo "Unknown pipeline: $PIPELINE"
-        echo "Valid: rnaseq sarek eager viralrecon chipseq atacseq mag ampliseq all"
+        echo "Valid: rnaseq sarek eager viralrecon chipseq atacseq mag ampliseq methylseq all"
         exit 1
         ;;
 esac
 
 log "=== DOWNLOAD SUMMARY ==="
-for pipe in nf-core_rnaseq nf-core_sarek nf-core_eager nf-core_viralrecon nf-core_chipseq nf-core_atacseq nf-core_mag nf-core_ampliseq; do
+for pipe in nf-core_rnaseq nf-core_sarek nf-core_eager nf-core_viralrecon nf-core_chipseq nf-core_atacseq nf-core_mag nf-core_ampliseq nf-core_methylseq; do
     sd="$DATA_ROOT/$pipe/small"
     md="$DATA_ROOT/$pipe/medium"
     if [[ -d "$sd" ]]; then
