@@ -31,14 +31,13 @@ echo
 
 START=$(date +%s)
 
-LD_PRELOAD="$LIBDARSHAN" \
-DARSHAN_ENABLE_NONMPI=1 \
 DARSHAN_LOGPATH="$RUN_DIR/darshan_logs" \
 DARSHAN_LOG_DIR_PATH="$RUN_DIR/darshan_logs" \
 NXF_OPTS='-Xms2g -Xmx8g' \
 nextflow run nf-core/methylseq \
     -r 4.2.0 \
     -profile test,singularity \
+    -c "$WIDGET_ROOT/hpc_workflows/templates/delta/darshan.nf.config" \
     --max_cpus 32 \
     --max_memory '60.GB' \
     --max_time '1.h' \

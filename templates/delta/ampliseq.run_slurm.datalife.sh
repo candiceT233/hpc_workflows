@@ -31,14 +31,13 @@ echo
 
 START=$(date +%s)
 
-LD_PRELOAD="$LIBMONITOR" \
-MONITOR_UNSET_LIB=1 \
 DATALIFE_OUTPUT_PATH="$RUN_DIR/datalife_traces" \
 DATALIFE_FILE_PATTERNS='*.fastq,*.fastq.gz,*.fq,*.fq.gz,*.fasta,*.fa,*.tsv,*.csv,*.biom,*.qza,*.qzv,*.html,*.txt,results*' \
 NXF_OPTS='-Xms2g -Xmx8g' \
 nextflow run nf-core/ampliseq \
     -r 2.17.0 \
     -profile test,singularity \
+    -c "$WIDGET_ROOT/hpc_workflows/templates/delta/datalife.nf.config" \
     --max_cpus 32 \
     --max_memory '60.GB' \
     --max_time '1.h' \

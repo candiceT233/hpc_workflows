@@ -37,7 +37,7 @@ NXF_OPTS='-Xms2g -Xmx8g' \
 nextflow run nf-core/methylseq \
     -r 4.2.0 \
     -profile test,singularity \
-    -c "$RUN_DIR/datalife.nf.config" \
+    -c "$WIDGET_ROOT/hpc_workflows/templates/delta/datalife.nf.config" \
     --max_cpus 32 \
     --max_memory '60.GB' \
     --max_time '1.h' \
