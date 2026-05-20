@@ -1,0 +1,31 @@
+# PyFLEXTRKR dask-mpi memory_limit fix
+# Applies to: runs/PyFLEXTRKR/multinode_<N>node*/run_mcs_tbpf_mpi.py
+#
+# Context: dask_mpi.initialize() defaults memory_limit='auto', which on Ares
+# reads SLURM cgroup memory and undersizes workers to ~1.17 GiB on a
+# 40-core 47-GB node. At scale this causes OOM mid-tracking. Hardcoding
+# memory_limit='8GB' (per-worker, with 1 worker per MPI rank, 40 ranks/node)
+# keeps headroom: 40 * 8 = 320 GB requested vs 47 GB actual, so dask
+# spills/pauses earlier and doesn't terminate workers.
+#
+# Audit reference: MULTINODE_AUDIT_2026-05-18.md, per-workflow gotchas.
+# Note: the audit names the path repos/PyFLEXTRKR/run_mcs_tbpf_mpi.py but
+# the file actually lives under each runs/PyFLEXTRKR/multinode_*node*/ copy.
+# Apply this fix to every copy that gets re-used or freshly authored.
+#
+# Cluster-port reapply: copy this patch to the new cluster and run:
+#   patch -p1 < patches/PyFLEXTRKR_dask_memory_limit.patch
+# against each run dir (paths shown below).
+
+--- a/runs/PyFLEXTRKR/multinode_4node/run_mcs_tbpf_mpi.py
++++ b/runs/PyFLEXTRKR/multinode_4node/run_mcs_tbpf_mpi.py
+@@ -86,7 +86,10 @@
+     elif run_parallel == 2:
+         dask_local_dir = config.get("dask_tmp_dir", "/tmp/pyflextrkr_dask")
+         os.makedirs(dask_local_dir, exist_ok=True)
+-        initialize(dashboard=False, local_directory=dask_local_dir)
++        # memory_limit='8GB' overrides dask-mpi's 'auto' which reads SLURM cgroup
++        # and undersizes workers to ~1.17 GiB on Ares (40-core, 47 GB nodes),
++        # triggering OOM at scale. See MULTINODE_AUDIT_2026-05-18.md §gotchas.
++        initialize(dashboard=False, local_directory=dask_local_dir, memory_limit='8GB')
+         client = Client()

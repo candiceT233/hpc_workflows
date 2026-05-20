@@ -1,0 +1,71 @@
+diff --git a/flow-monitor/inc/Lib.h b/flow-monitor/inc/Lib.h
+index 2dbb8f3..77c3b3b 100644
+--- a/flow-monitor/inc/Lib.h
++++ b/flow-monitor/inc/Lib.h
+@@ -325,12 +325,25 @@ inline auto innerWrapper(const char *pathname, bool &isMonitorFile, Func monitor
+   std::string path;
+   std::string file;
+   MonitorFile::Type type;
+-  
++
+   std::string test_tty(pathname);
+   if(test_tty.find("tty") != std::string::npos) {
+     return posixFun(args...);
+   }
+ 
++  // 2026-05-19: don't instrument files inside DATALIFE_OUTPUT_PATH itself.
++  // Otherwise a permissive DATALIFE_FILE_PATTERNS (e.g. "config*") matches
++  // libmonitor's own previously-written trace files, instruments them,
++  // writes new traces named like "<original>_<pid>_w_stat", which match the
++  // same pattern, instrument again — exponential filename growth.
++  if (!Config::dataLifeOutputPath.empty()) {
++    std::string test_pathname(pathname);
++    if (test_pathname.compare(0, Config::dataLifeOutputPath.size(),
++                              Config::dataLifeOutputPath) == 0) {
++      return posixFun(args...);
++    }
++  }
++
+   for (auto pattern: patterns) {
+     auto ret_val = fnmatch(pattern.c_str(), get_basename(pathname), 0);
+     if (ret_val == 0) {
+diff --git a/flow-monitor/src/Lib.cpp b/flow-monitor/src/Lib.cpp
+index 257a44e..d23e3d3 100644
+--- a/flow-monitor/src/Lib.cpp
++++ b/flow-monitor/src/Lib.cpp
+@@ -160,7 +160,14 @@ void __attribute__((constructor)) monitorInit(void) {
+         // the full rationale.
+         static const char *wrapper_helper_basenames[] = {
+             "ps", "grep", "awk", "sed", "head", "tail", "cat",
+-            "ls", "wc", "cut", "sort", "uniq", "tr", "expr", "date", NULL
++            "ls", "wc", "cut", "sort", "uniq", "tr", "expr", "date",
++            // 2026-05-19: tty/stty/tput corrupt Nextflow's tty parse with
++            // "[MONITOR] tty" on stdout — Nextflow's driver tries to read
++            // the tty subprocess output as a tty path, hits a NumberFormat
++            // parse error, and aborts at startup. Adding these to the
++            // skip list keeps the driver clean.
++            "tty", "stty", "tput",
++            NULL
+         };
+         char exe[PATH_MAX];
+         ssize_t n = readlink("/proc/self/exe", exe, sizeof(exe) - 1);
+diff --git a/flow-monitor/src/Timer.cpp b/flow-monitor/src/Timer.cpp
+index 1e4af49..f7bb7ef 100644
+--- a/flow-monitor/src/Timer.cpp
++++ b/flow-monitor/src/Timer.cpp
+@@ -60,7 +60,14 @@ Timer::Timer() {
+         }
+     }
+ 
+-    stdoutcp = dup(1);
++    // 2026-05-19: dup stderr (fd 2), not stdout. The destructor's [MONITOR]
++    // banner + per-metric timer dump is written to this fd. Writing to stdout
++    // pollutes any captured-stdout parent process — e.g. Nextflow runs
++    // `python -c '...some_yaml_dump...'` as a child, parses its stdout as
++    // YAML, and chokes on the [MONITOR] preamble with "while scanning a
++    // simple key" → workflow aborts at startup. stderr is interleaved but
++    // not parsed by Nextflow. Variable name stdoutcp kept for diff size.
++    stdoutcp = dup(2);
+     myprogname = __progname;
+     _thread_timers = new std::unordered_map<std::thread::id, Timer::ThreadMetric*>;
+ }
