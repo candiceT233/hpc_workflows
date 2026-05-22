@@ -75,3 +75,18 @@ Thumbs.db
 # --- ASA upload clone (separate repo, not part of hpc_workflows) ---
 upload-asa/
 .claude/settings.local.json
+
+# --- PyFLEXTRKR + Montage scaling-eval generated data (large/reproducible) ---
+runs/PyFLEXTRKR/scale_dayu/track_*/
+runs/PyFLEXTRKR/scale_dayu/dayu_traces_*/
+runs/PyFLEXTRKR/scale_dayu/logs_*/
+runs/PyFLEXTRKR/scale_dayu/task_files_*/
+runs/PyFLEXTRKR/pyflextrkr_env/
+runs/PyFLEXTRKR/scale_dayu/probe*
+runs/Montage/scale_prof/logs_*/
+runs/Montage/scale_prof/traces_*/
+runs/Montage/scale_prof/*.out
+runs/Montage/scale_prof/.*_jid
+data/Montage/_test/
+data/Montage/tiles_*/
+# NOTE: Montage workload I/O + traces live on BeeGFS (/rcfs/projects/chess/$USER/montage_eval), not in-repo
