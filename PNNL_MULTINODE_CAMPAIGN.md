@@ -47,7 +47,7 @@ patterns), correctness-of-traces is part of done. **DaYu N/A unless HDF5/NetCDF.
 | 6 | dna-seq-varlociraptor | A/D | DataLife | 4–30 | N/A | dep | dep | N/A | N/A |
 | 7 | metaGEM | A | DataLife | ≤12 | N/A | dep | dep | N/A | N/A |
 | 8 | **Montage** | A | DataLife | 16 | 120 | **pass** | **pass** | **pass** | **pass** |
-| 9–42 | nf-core_* (22 pipelines) | C | DataLife | 4–18 | N/A | dep | dep | N/A | N/A |
+| 9–42 | nf-core_* (22 pipelines) | C | DataLife/Darshan | 4 | N/A | (DataLife TBD) | **8 pass / 10 fail** | N/A | N/A |
 | 43 | **PyFLEXTRKR** | B | DaYu | 4–48 | 80 | **pass(DaYu)** | | **pass(DaYu)** | **pass(Darshan)** |
 | 44 | rna-seq-star-deseq2 | A | DataLife | ≤5 | N/A | dep | dep | N/A | N/A |
 | 45 | V-pipe | A | DataLife | ≤2 | N/A | dep | dep | N/A | N/A |
@@ -61,6 +61,20 @@ patterns), correctness-of-traces is part of done. **DaYu N/A unless HDF5/NetCDF.
 | 53 | radical.pilot | framework | DataLife | 4–30 | 80+ | dep | dep | dep | dep |
 
 (Full per-nf-core rows expand rows 9–42; nf-core LARGE is uniformly N/A by DAG cap.)
+
+## nf-core breadth — Darshan, 4 nodes, `test` profile (SMALL scale) — `logs/nfcore_darshan_sweep.tsv`
+Run via HyperQueue (`hq_nfcore_pnnl.sbatch`), serial dependency chain (no concurrent conda-env
+creation → no Rule-5 cache corruption). Darshan logs verified parseable + capture real tool I/O
+(e.g. samtools POSIX_BYTES_READ=6.5 MB). Logs are noisy (~95% are shell-helper procs: bash/grep/awk).
+
+**8 PASS** (EXIT=0, NF "completed successfully"): bacass, nascent, detaxizer, createtaxdb,
+funcscan, taxprofiler, mag, rnaseq.
+**10 FAIL/parked:** smrnaseq (test-data merge), methylseq (empty BAM), viralrecon (R reshape2),
+genomeqc (GENE_OVERLAPS), circdna (UNICYCLER), ampliseq (qiime2), cutandrun (NF-API drift),
+sarek (gatk), clipseq + deepvariant (**DSL1 — needs NF≤22.10**).
+Most failures are at terminal/QC steps after the I/O-heavy stages ran (logs still captured), or
+tool/version/test-data artifacts — consistent with `test`-profile being a harness map, not a
+full-realistic `pass`. **DataLife pass still required** (criterion 3): testing on bacass.
 
 ## LARGE-scale (80–100+) feasible set (the real "blow up" list)
 **PyFLEXTRKR✅, Montage✅, DeepDriveMD, lammps, nwchem, biobb(synth PDBs)** — plus frameworks

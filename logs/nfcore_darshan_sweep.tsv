@@ -1,0 +1,19 @@
+workflow	class	nodes	profiler	nf_profile	exit	nf_status	darshan_logs	fail_stage_or_note
+nf-core_bacass	C	4	darshan	test	0	completed	51291	PASS
+nf-core_nascent	C	4	darshan	test	0	completed	31037	PASS
+nf-core_detaxizer	C	4	darshan	test	0	completed	8803	PASS
+nf-core_createtaxdb	C	4	darshan	test	0	completed	9044	PASS
+nf-core_funcscan	C	4	darshan	test	0	completed	45207	PASS
+nf-core_taxprofiler	C	4	darshan	test	0	completed	66117	PASS
+nf-core_mag	C	4	darshan	test	0	completed	42189	PASS
+nf-core_rnaseq	C	4	darshan	test	0	completed	76014	PASS
+nf-core_smrnaseq	C	4	darshan	test	1	failed	153342	test-data: DATATABLE_MERGE 'miRNA' not found (cleared align/quant)
+nf-core_methylseq	C	4	darshan	test	1	failed	9138	BISMARK_DEDUPLICATE: empty/0-aln BAM upstream
+nf-core_viralrecon	C	4	darshan	test	1	failed	76720	PLOT_BASE_DENSITY: R reshape2 dyn.load fail (cleared align/consensus)
+nf-core_genomeqc	C	4	darshan	test	1	failed	11245	GENE_OVERLAPS
+nf-core_circdna	C	4	darshan	test	1	failed	4879	UNICYCLER
+nf-core_ampliseq	C	4	darshan	test	1	failed	6091	QIIME2_EXTRACT (qiime2)
+nf-core_cutandrun	C	4	darshan	test	1	failed	0	NF-API: optional() on null (trimgalore module vs NF 25.x)
+nf-core_sarek	C	4	darshan	test	1	failed	632	GATK4_INTERVALLISTTOBED
+nf-core_clipseq	C	4	darshan	test	1	none	0	DSL1 (needs NF<=22.10)
+nf-core_deepvariant	C	4	darshan	test	1	none	0	DSL1 (needs NF<=22.10)
