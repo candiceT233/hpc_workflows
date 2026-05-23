@@ -17,3 +17,4 @@ nf-core_cutandrun	C	4	darshan	test	1	failed	0	NF-API: optional() on null (trimga
 nf-core_sarek	C	4	darshan	test	1	failed	632	GATK4_INTERVALLISTTOBED
 nf-core_clipseq	C	4	darshan	test	1	none	0	DSL1 (needs NF<=22.10)
 nf-core_deepvariant	C	4	darshan	test	1	none	0	DSL1 (needs NF<=22.10)
+nf-core_bacass	C	4	DATALIFE	test	1	timeout	0	BLOCKER: libmonitor hangs on nf-core (~50K procs); 90min walltime timeout. nf-core = Darshan-only. DaYu N/A (no HDF5).
