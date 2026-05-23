@@ -18,3 +18,13 @@ nf-core_sarek	C	4	darshan	test	1	failed	632	GATK4_INTERVALLISTTOBED
 nf-core_clipseq	C	4	darshan	test	1	none	0	DSL1 (needs NF<=22.10)
 nf-core_deepvariant	C	4	darshan	test	1	none	0	DSL1 (needs NF<=22.10)
 nf-core_bacass	C	4	DATALIFE	test	1	timeout	0	BLOCKER: libmonitor hangs on nf-core (~50K procs); 90min walltime timeout. nf-core = Darshan-only. DaYu N/A (no HDF5).
+nf-core_proteinfold	C	4	darshan	test	0	completed	1253	PASS
+nf-core_pathogensurveillance	C	4	darshan	test	0	completed	15862	PASS
+nf-core_differentialabundance	C	4	darshan	test	1	none	0	GUNZIP_GTF (first step; test-data/input)
+nf-core_scrnaseq	C	4	darshan	test	1	none	0	container-only: CELLRANGERARC (no conda)
+nf-core_scnanoseq	C	4	darshan	test	1	failed	2243	NANOPLOT
+nf-core_dualrnaseq	C	4	darshan	test	1	none	0	DSL1 (needs NF<=22.10)
+nf-core_airrflow	C	4	darshan	test	1	none	0	container-only (no conda)
+nf-core_mhcquant	C	4	darshan	test	1	failed	7004	MS2RESCORE
+nf-core_spatialvi	C	4	darshan	test	1	failed	230	SPACERANGER (10x proprietary)
+nf-core_tumourevo	C	4	darshan	test	1	none	38439	SPARSE_SIGNATURES (R)
