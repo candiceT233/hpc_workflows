@@ -1,0 +1,7 @@
+1000genome-workflow	single	19569-single	runs/1000genome-workflow/slurm-19569-single.out	scanner_status
+DeepDriveMD-pipeline	trace	19327-4node-profiled	runs/DeepDriveMD-pipeline/slurm-19327-4node-profiled.out	wrapper completion / trace parsed
+dna-seq-varlociraptor	multi	19287-4node	runs/dna-seq-varlociraptor/slurm-19287-4node.out	wrapper completion message
+metaGEM	single	19863-single	runs/metaGEM/slurm-19863-single.out	wrapper completion message
+nf-core_fetchngs	single	19977-single	runs/nf-core_fetchngs/slurm-19977-single.out	scanner_status
+nf-core_funcscan	single	19946-single	runs/nf-core_funcscan/slurm-19946-single.out	scanner_status
+rna-seq-star-deseq2	trace	19330-4node-profiled	runs/rna-seq-star-deseq2/slurm-19330-4node-profiled.out	scanner_status

@@ -5,7 +5,7 @@ This file lives in the **project repository root** (alongside `workflow_run.prom
 
 ```bash
 export WORKFLOW_ROOT="<absolute path to this repository's root>"
-# Example on Ares: /mnt/common/mtang11/hpc_workflows
+# Example on Ares: /mnt/common/jcernudagarcia/hpc_workflows
 ```
 
 Use `$WORKFLOW_ROOT` for all paths below (do not assume `~/hpc_workflows`).
@@ -19,11 +19,11 @@ Use `$WORKFLOW_ROOT` for all paths below (do not assume `~/hpc_workflows`).
   - **`debug`** — **MaxTime=4-00:00:00**, ~6 nodes; suitable for short smoke tests.
 - **Node shape:** **40 CPUs** per node, **~47759 MiB RAM** (~46.6 GB) per node (`sinfo -o '%c %m'`).
 - **Darshan:** There is **no** `darshan` module in Lmod on Ares (`module avail darshan` is empty). Build runtime from source under `$WORKFLOW_ROOT/tools/darshan` (see Phase 5).
-- **Conda:** There is **no** cluster `module load conda`. User Miniconda exists at **`/mnt/common/mtang11/miniconda3`** and **`/home/mtang11/miniconda3`** (same install). Agents must `source $CONDA_ROOT/etc/profile.d/conda.sh` — `conda` is **not** on default `PATH` in non-interactive/batch shells. Prefer creating envs with **prefix under** `$WORKFLOW_ROOT/runs/<repo>/env/`.
+- **Conda:** There is **no** cluster `module load conda`. Use the checkout-local Miniforge at **`$WORKFLOW_ROOT/tools/miniforge`** by default, or an explicitly supplied `CONDA_ROOT`. Agents must `source $CONDA_ROOT/etc/profile.d/conda.sh` when using Conda — `conda` is **not** on default `PATH` in non-interactive/batch shells. Prefer creating envs with **prefix under** `$WORKFLOW_ROOT/runs/<repo>/env/` or a workflow-specific cache under `$WORKFLOW_ROOT/tools/`.
 
-**Execution skip (Phase 5 / any benchmark run):** Do not execute the **1000genome-workflow**
-repo (`1000genome-workflow`); it may remain in the catalog for reference. All other listed
-workflows are in scope unless a later phase marks them FATAL.
+**Execution scope:** All target workflows are in scope, including **1000genome-workflow**.
+Use each workflow's native workflow management system whenever possible; for
+1000genome-workflow that means Pegasus, not the direct Python DAG fallback.
 
 ---
 
@@ -286,7 +286,7 @@ You are a terminal agent on the Ares HPC cluster with the following available:
 
 NOT pre-installed (must be installed per-workflow into local envs under $WORKFLOW_ROOT):
   - Nextflow, Snakemake, Parsl, cwltool, miniwdl (install via pip, curl, or conda into a prefix under $WORKFLOW_ROOT/runs/<repo>/env/)
-  - **Conda:** use user Miniconda at `/mnt/common/mtang11/miniconda3` or `/home/mtang11/miniconda3` — `source .../etc/profile.d/conda.sh` (see “Ares cluster” above). Not on `PATH` by default in batch jobs.
+  - **Conda:** use `CONDA_ROOT="${CONDA_ROOT:-$WORKFLOW_ROOT/tools/miniforge}"` and source `"$CONDA_ROOT/etc/profile.d/conda.sh"` when a workflow needs Conda. Not on `PATH` by default in batch jobs.
   - Singularity/Apptainer (no container runtime in module tree — verify with `module avail` if policy changes)
   - Domain software: GROMACS, LAMMPS, NAMD, NWChem, OpenFOAM may be missing as modules —
     workflows requiring these must build from source under $WORKFLOW_ROOT or be flagged
@@ -296,11 +296,12 @@ You have:
   - $WORKFLOW_ROOT/data/<repo>/    (small/ and medium/ input datasets)
   - $WORKFLOW_ROOT/logs/data_status.tsv
 
-**SKIP (do not execute):** If repo_name is `1000genome-workflow`, log SKIPPED in
-execution_results.tsv with reason and continue to the next repo.
+**Native WMS rule:** Include `1000genome-workflow`. Execute it through
+Pegasus first; any direct Python DAG runner is only a debug fallback and must be
+logged as such if used.
 
 GOAL:
-Execute each other workflow at two input data scales (small and medium) under **SLURM**
+Execute each workflow at two input data scales (small and medium) under **SLURM**
 with a **4-node allocation** on Ares, record timing, resource usage, output correctness,
 and **Darshan I/O traces** for every run. Limits: input data ≤ 50 GB per workflow,
 wall time ≤ 4 hours per scale.
@@ -323,7 +324,7 @@ STEPS:
 
 1. For each repo_name with download_status = SUCCESS in data_status.tsv:
 
-   a. If repo_name is `1000genome-workflow`, skip execution (see SKIP above).
+   a. If repo_name is `1000genome-workflow`, use Pegasus as the native workflow manager.
 
    b. Inspect the repo to determine the execution method:
       - Nextflow:   check for main.nf or nextflow.config
@@ -406,7 +407,7 @@ STEPS:
    - N workflows: both scales succeeded
    - N workflows: small succeeded, medium failed or not attempted
    - N workflows: both scales failed
-   - N workflows: skipped (1000genome-workflow)
+   - N workflows: parked and why
    - Slowest workflow (by wall time) at each scale
    - Total compute time across all runs
 ```

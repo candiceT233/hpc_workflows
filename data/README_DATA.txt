@@ -29,7 +29,7 @@ IMPORTANT NOTES:
 
 DOWNLOAD SCRIPT
 ---------------
-  /mnt/common/mtang11/hpc_workflows/data/download_inputs.sh
+  /mnt/common/jcernudagarcia/hpc_workflows/data/download_inputs.sh
 
   Usage:
     bash download_inputs.sh           # download all 8 pipelines
@@ -43,8 +43,8 @@ PER-PIPELINE DETAILS
 
 1. nf-core/rnaseq
 -----------------
-   Repo: /mnt/common/mtang11/hpc_workflows/repos/nf-core_rnaseq
-   Data: /mnt/common/mtang11/hpc_workflows/data/nf-core_rnaseq/
+   Repo: /mnt/common/jcernudagarcia/hpc_workflows/repos/nf-core_rnaseq
+   Data: /mnt/common/jcernudagarcia/hpc_workflows/data/nf-core_rnaseq/
 
    small/ (26 MB):
      - 10 FASTQ files (7 samples from GSE110004, yeast Saccharomyces cerevisiae)
@@ -60,8 +60,8 @@ PER-PIPELINE DETAILS
 
 2. nf-core/sarek
 ----------------
-   Repo: /mnt/common/mtang11/hpc_workflows/repos/nf-core_sarek
-   Data: /mnt/common/mtang11/hpc_workflows/data/nf-core_sarek/
+   Repo: /mnt/common/jcernudagarcia/hpc_workflows/repos/nf-core_sarek
+   Data: /mnt/common/jcernudagarcia/hpc_workflows/data/nf-core_sarek/
 
    small/ (32 MB):
      - 2 FASTQ files (homo_sapiens test data, chr21 subset)
@@ -78,8 +78,8 @@ PER-PIPELINE DETAILS
 
 3. nf-core/eager
 ----------------
-   Repo: /mnt/common/mtang11/hpc_workflows/repos/nf-core_eager
-   Data: /mnt/common/mtang11/hpc_workflows/data/nf-core_eager/
+   Repo: /mnt/common/jcernudagarcia/hpc_workflows/repos/nf-core_eager
+   Data: /mnt/common/jcernudagarcia/hpc_workflows/data/nf-core_eager/
 
    small/ (2.0 MB):
      - 3 FASTQ files (Mammoth ancient DNA, 10k reads each)
@@ -97,8 +97,8 @@ PER-PIPELINE DETAILS
 
 4. nf-core/viralrecon
 ---------------------
-   Repo: /mnt/common/mtang11/hpc_workflows/repos/nf-core_viralrecon
-   Data: /mnt/common/mtang11/hpc_workflows/data/nf-core_viralrecon/
+   Repo: /mnt/common/jcernudagarcia/hpc_workflows/repos/nf-core_viralrecon
+   Data: /mnt/common/jcernudagarcia/hpc_workflows/data/nf-core_viralrecon/
 
    small/ (56 MB):
      - 4 FASTQ files (SARS-CoV-2 amplicon, 2 PE samples + 1 SE)
@@ -115,8 +115,8 @@ PER-PIPELINE DETAILS
 
 5. nf-core/chipseq
 ------------------
-   Repo: /mnt/common/mtang11/hpc_workflows/repos/nf-core_chipseq
-   Data: /mnt/common/mtang11/hpc_workflows/data/nf-core_chipseq/
+   Repo: /mnt/common/jcernudagarcia/hpc_workflows/repos/nf-core_chipseq
+   Data: /mnt/common/jcernudagarcia/hpc_workflows/data/nf-core_chipseq/
 
    small/ (80 MB):
      - 12 FASTQ files:
@@ -134,8 +134,8 @@ PER-PIPELINE DETAILS
 
 6. nf-core/atacseq
 ------------------
-   Repo: /mnt/common/mtang11/hpc_workflows/repos/nf-core_atacseq
-   Data: /mnt/common/mtang11/hpc_workflows/data/nf-core_atacseq/
+   Repo: /mnt/common/jcernudagarcia/hpc_workflows/repos/nf-core_atacseq
+   Data: /mnt/common/jcernudagarcia/hpc_workflows/data/nf-core_atacseq/
 
    small/ (64 MB):
      - 8 FASTQ files (4 PE samples: osmotic stress time course, yeast)
@@ -151,8 +151,8 @@ PER-PIPELINE DETAILS
 
 7. nf-core/mag
 --------------
-   Repo: /mnt/common/mtang11/hpc_workflows/repos/nf-core_mag
-   Data: /mnt/common/mtang11/hpc_workflows/data/nf-core_mag/
+   Repo: /mnt/common/jcernudagarcia/hpc_workflows/repos/nf-core_mag
+   Data: /mnt/common/jcernudagarcia/hpc_workflows/data/nf-core_mag/
 
    small/ (44 MB):
      - 4 FASTQ files (2 PE metagenome samples: minigut synthetic)
@@ -168,8 +168,8 @@ PER-PIPELINE DETAILS
 
 8. nf-core/ampliseq
 -------------------
-   Repo: /mnt/common/mtang11/hpc_workflows/repos/nf-core_ampliseq
-   Data: /mnt/common/mtang11/hpc_workflows/data/nf-core_ampliseq/
+   Repo: /mnt/common/jcernudagarcia/hpc_workflows/repos/nf-core_ampliseq
+   Data: /mnt/common/jcernudagarcia/hpc_workflows/data/nf-core_ampliseq/
 
    small/ (2.5 MB):
      - 8 FASTQ files (4 PE 16S amplicon samples)

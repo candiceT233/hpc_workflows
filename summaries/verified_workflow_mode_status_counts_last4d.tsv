@@ -1,0 +1,12 @@
+26	single	fail
+17	single	pass
+11	multi	pass
+9	trace	pass
+6	single	unknown
+4	multi	unknown
+3	single	running
+2	other	pass
+2	other	fail
+1	trace	unknown
+1	trace	fail
+1	multi	running

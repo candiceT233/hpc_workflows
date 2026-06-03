@@ -4,16 +4,34 @@
 set -euo pipefail
 
 SCALE="${1:-small}"
-WORKFLOW_ROOT="/mnt/common/mtang11/hpc_workflows"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORKFLOW_ROOT="${WORKFLOW_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
 MONTAGE_BIN="$WORKFLOW_ROOT/repos/Montage/bin"
 DATA_DIR="$WORKFLOW_ROOT/data/Montage/${SCALE}"
-OUT_DIR="$WORKFLOW_ROOT/runs/Montage/${SCALE}/outputs"
-LOG_DIR="$WORKFLOW_ROOT/runs/Montage/${SCALE}/logs"
+OUT_DIR="${MONTAGE_OUT_DIR:-$WORKFLOW_ROOT/runs/Montage/${SCALE}/outputs}"
+LOG_DIR="${MONTAGE_LOG_DIR:-$WORKFLOW_ROOT/runs/Montage/${SCALE}/logs}"
 
 export PATH="$MONTAGE_BIN:$PATH"
 
+mkdir -p "$OUT_DIR" "$LOG_DIR"
 RUNLOG="$LOG_DIR/montage_run.log"
 exec > >(tee -a "$RUNLOG") 2>&1
+
+run_montage_cmd() {
+    if [ "${MONTAGE_PROFILE_MODE:-}" = "datalife" ]; then
+        env DATALIFE_OUTPUT_PATH="${MONTAGE_TRACE_DIR:-$LOG_DIR}" \
+            DATALIFE_FILE_PATTERNS="${MONTAGE_DATALIFE_FILE_PATTERNS:-*.fits,*.tbl,*.hdr,*.log}" \
+            LD_PRELOAD="${DATALIFE_LIB:-}" \
+            "$@"
+    elif [ "${MONTAGE_PROFILE_MODE:-}" = "darshan" ]; then
+        env DARSHAN_ENABLE_NONMPI=1 \
+            DARSHAN_LOG_DIR_PATH="${MONTAGE_TRACE_DIR:-$LOG_DIR}" \
+            LD_PRELOAD="${DARSHAN_LIB:-}" \
+            "$@"
+    else
+        "$@"
+    fi
+}
 
 echo "=== Montage Pipeline: scale=$SCALE ==="
 echo "Start: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -44,61 +62,61 @@ mkdir -p "$PROJ_DIR" "$DIFF_DIR" "$CORR_DIR"
 # Step 1: mImgtbl - Create image metadata table
 echo ""
 echo "--- Step 1: mImgtbl ---"
-mImgtbl "$RAW_DIR" "$OUT_DIR/images.tbl"
+run_montage_cmd mImgtbl "$RAW_DIR" "$OUT_DIR/images.tbl"
 echo "mImgtbl completed: $(wc -l < "$OUT_DIR/images.tbl") lines in images.tbl"
 
 # Step 2: mProjExec - Reproject all images
 echo ""
 echo "--- Step 2: mProjExec ---"
-mProjExec -p "$RAW_DIR" "$OUT_DIR/images.tbl" "$HDR_FILE" "$PROJ_DIR" "$OUT_DIR/stats.tbl"
+run_montage_cmd mProjExec -p "$RAW_DIR" "$OUT_DIR/images.tbl" "$HDR_FILE" "$PROJ_DIR" "$OUT_DIR/stats.tbl"
 echo "mProjExec completed"
 
 # Step 3: mImgtbl on projected images
 echo ""
 echo "--- Step 3: mImgtbl (projected) ---"
-mImgtbl "$PROJ_DIR" "$OUT_DIR/proj_images.tbl"
+run_montage_cmd mImgtbl "$PROJ_DIR" "$OUT_DIR/proj_images.tbl"
 echo "Projected image table created"
 
 # Step 4: mOverlaps - Find overlapping images
 echo ""
 echo "--- Step 4: mOverlaps ---"
-mOverlaps "$OUT_DIR/proj_images.tbl" "$OUT_DIR/diffs.tbl"
+run_montage_cmd mOverlaps "$OUT_DIR/proj_images.tbl" "$OUT_DIR/diffs.tbl"
 echo "mOverlaps completed"
 
 # Step 5: mDiffExec - Compute difference images
 echo ""
 echo "--- Step 5: mDiffExec ---"
-mDiffExec -p "$PROJ_DIR" "$OUT_DIR/diffs.tbl" "$HDR_FILE" "$DIFF_DIR"
+run_montage_cmd mDiffExec -p "$PROJ_DIR" "$OUT_DIR/diffs.tbl" "$HDR_FILE" "$DIFF_DIR"
 echo "mDiffExec completed"
 
 # Step 6: mFitExec - Fit planes to differences
 echo ""
 echo "--- Step 6: mFitExec ---"
-mFitExec "$OUT_DIR/diffs.tbl" "$OUT_DIR/fits.tbl" "$DIFF_DIR"
+run_montage_cmd mFitExec "$OUT_DIR/diffs.tbl" "$OUT_DIR/fits.tbl" "$DIFF_DIR"
 echo "mFitExec completed"
 
 # Step 7: mBgModel - Model background corrections
 echo ""
 echo "--- Step 7: mBgModel ---"
-mBgModel "$OUT_DIR/proj_images.tbl" "$OUT_DIR/fits.tbl" "$OUT_DIR/corrections.tbl"
+run_montage_cmd mBgModel "$OUT_DIR/proj_images.tbl" "$OUT_DIR/fits.tbl" "$OUT_DIR/corrections.tbl"
 echo "mBgModel completed"
 
 # Step 8: mBgExec - Apply background corrections
 echo ""
 echo "--- Step 8: mBgExec ---"
-mBgExec -p "$PROJ_DIR" "$OUT_DIR/proj_images.tbl" "$OUT_DIR/corrections.tbl" "$CORR_DIR"
+run_montage_cmd mBgExec -p "$PROJ_DIR" "$OUT_DIR/proj_images.tbl" "$OUT_DIR/corrections.tbl" "$CORR_DIR"
 echo "mBgExec completed"
 
 # Step 9: mImgtbl on corrected images
 echo ""
 echo "--- Step 9: mImgtbl (corrected) ---"
-mImgtbl "$CORR_DIR" "$OUT_DIR/corr_images.tbl"
+run_montage_cmd mImgtbl "$CORR_DIR" "$OUT_DIR/corr_images.tbl"
 echo "Corrected image table created"
 
 # Step 10: mAdd - Co-add corrected images into final mosaic
 echo ""
 echo "--- Step 10: mAdd ---"
-mAdd -p "$CORR_DIR" "$OUT_DIR/corr_images.tbl" "$HDR_FILE" "$OUT_DIR/mosaic.fits"
+run_montage_cmd mAdd -p "$CORR_DIR" "$OUT_DIR/corr_images.tbl" "$HDR_FILE" "$OUT_DIR/mosaic.fits"
 echo "mAdd completed"
 
 # Validate output

@@ -1,11 +1,11 @@
 # Phase 6 — Environment Setup, Execution, Validation, and Self-Repair
 
 This file lives in the **project repository root** (alongside `workflow_discovery.prompt`).
-Set `WORKFLOW_ROOT` to the absolute path of that repository (e.g. `/mnt/common/mtang11/hpc_workflows`).
+Set `WORKFLOW_ROOT` to the absolute path of that repository (e.g. `/mnt/common/jcernudagarcia/hpc_workflows`).
 
-**Execution skip:** Do **not** run Phase 6 for repo **`1000genome-workflow`**. Record it as
-`SKIPPED` in `logs/phase6_results.tsv` with NOTES. All other workflows with data ready should
-be executed normally (no other blanket skips).
+**Execution scope:** All target workflows are in scope. For Pegasus workflows, including
+**`1000genome-workflow`**, use Pegasus itself as the primary workflow manager; direct Python
+DAG runners are fallback/debug harnesses and do not count as native Pegasus success.
 
 ### Ares cluster (this system)
 
@@ -19,14 +19,13 @@ Verified with `sinfo` / `scontrol show partition`:
 
 - **Node:** 40 CPUs, ~47759 MiB RAM per node (~46.6 GB).
 - **Darshan:** No Lmod module on Ares — build under `$WORKFLOW_ROOT/tools/darshan` from upstream releases.
-- **Conda (Miniconda):** There is **no** `module load conda`. Verified installs:
-  - **`/mnt/common/mtang11/miniconda3`** (prefer when `WORKFLOW_ROOT` is under `/mnt/common/mtang11/`)
-  - **`/home/mtang11/miniconda3`** (same stack; use if the other path is unavailable)
+- **Conda (Miniforge):** There is **no** `module load conda`. Use the checkout-local
+  **`$WORKFLOW_ROOT/tools/miniforge`** by default, or an explicitly supplied `CONDA_ROOT`.
 
   In **non-interactive shells and `#SBATCH` jobs**, `conda` is **not** on `PATH` until you run:
 
   ```bash
-  export CONDA_ROOT="${CONDA_ROOT:-/mnt/common/mtang11/miniconda3}"
+  export CONDA_ROOT="${CONDA_ROOT:-$WORKFLOW_ROOT/tools/miniforge}"
   source "$CONDA_ROOT/etc/profile.d/conda.sh"
   ```
 
@@ -49,7 +48,7 @@ PERMITTED ZONES (read, write, execute):
   Includes $WORKFLOW_ROOT/tools/** (e.g. Darshan built from source under tools/darshan/)
 
 PERMITTED — Conda runtime only (read + execute binaries; do not store workflow envs here):
-  /mnt/common/mtang11/miniconda3/**  and  /home/mtang11/miniconda3/**
+  ${CONDA_ROOT:-$WORKFLOW_ROOT/tools/miniforge}/**
   (Use only to `source etc/profile.d/conda.sh` and run `conda`; create envs with `-p` under
   $WORKFLOW_ROOT/runs/<repo>/env/. Optionally set CONDA_PKGS_DIRS under $WORKFLOW_ROOT/tools/.)
 
@@ -127,7 +126,7 @@ bash phase6_run_validate.sh --all
 ```
 You are a terminal agent operating under strict filesystem constraints. Before any file
 operation, confirm the target path starts with $WORKFLOW_ROOT **or** is allowed Miniconda
-read/execute under `/mnt/common/mtang11/miniconda3` or `/home/mtang11/miniconda3` (see safety
+read/execute under `${CONDA_ROOT:-$WORKFLOW_ROOT/tools/miniforge}` (see safety
 block). Otherwise abort and log PATH VIOLATION. Do not write project files outside
 $WORKFLOW_ROOT except conda package caches directed to $WORKFLOW_ROOT/tools/conda_pkgs when set.
 
@@ -138,8 +137,9 @@ WORKFLOW_ROOT = $WORKFLOW_ROOT          (set in your shell environment)
 INPUT: repo_name (single workflow name, or "--all" for all rows in
        $WORKFLOW_ROOT/logs/data_status.tsv with download_status=SUCCESS)
 
-If repo_name is **1000genome-workflow** (or included via --all): do not execute; append a
-SKIPPED row to phase6_results.tsv with NOTES and skip to the next repo.
+If repo_name is **1000genome-workflow** (or included via --all): execute it through
+Pegasus first. If Pegasus is genuinely blocked, log that critically before using any
+direct Python DAG runner as a debug fallback.
 
 For each other target workflow, execute ALL steps below in order.
 
@@ -184,7 +184,7 @@ inside $WORKFLOW_ROOT/runs/<repo_name>/env/. Never install to system paths.
 
 2b. Detect language/dependency requirements:
     Initialize Miniconda in every shell that runs setup (see “Conda” under Ares above):
-      export CONDA_ROOT="${CONDA_ROOT:-/mnt/common/mtang11/miniconda3}"
+      export CONDA_ROOT="${CONDA_ROOT:-$WORKFLOW_ROOT/tools/miniforge}"
       source "$CONDA_ROOT/etc/profile.d/conda.sh"
     Check for (in order of precedence):
       - environment.yml or conda_env.yml       → prefer **conda** env with prefix
@@ -713,5 +713,5 @@ safe_exec() {
 | Filesystem scope     | $WORKFLOW_ROOT only                | safe_path() guard on every op          |
 | Privilege level      | current user only                  | no sudo / chmod outside WORKFLOW_ROOT  |
 | Container runtime    | NOT available                      | no Singularity/Apptainer on system     |
-| Conda                | Miniconda at `/mnt/common/mtang11/miniconda3` or `/home/mtang11/miniconda3` | `source etc/profile.d/conda.sh`; envs under `$WORKFLOW_ROOT/runs/.../env/` |
-| Skip execution       | 1000genome-workflow only           | SKIPPED row in phase6_results.tsv      |
+| Conda                | Miniforge at `${CONDA_ROOT:-$WORKFLOW_ROOT/tools/miniforge}` | `source etc/profile.d/conda.sh`; envs under `$WORKFLOW_ROOT/runs/.../env/` or workflow-specific caches under `$WORKFLOW_ROOT/tools/` |
+| Native WMS           | Required before fallback           | Pegasus for 1000genome; log fallback use |

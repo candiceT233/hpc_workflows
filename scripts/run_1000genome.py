@@ -264,30 +264,31 @@ def run_workflow(scale, data_dir, data_csv, work_dir, output_dir, log_dir, logfi
 
 
 def main():
-    WORKFLOW_ROOT = "/mnt/common/mtang11/hpc_workflows"
-    REPO = f"{WORKFLOW_ROOT}/repos/1000genome-workflow"
-    DATA_BASE = f"{WORKFLOW_ROOT}/data/1000genome-workflow"
-    RUN_BASE = f"{WORKFLOW_ROOT}/runs/1000genome-workflow"
-    BIN_DIR = f"{REPO}/bin"
-    RUNLOG = f"{WORKFLOW_ROOT}/logs/phase6/1000genome-workflow_phase6.log"
+    workflow_root = Path(os.environ.get("WORKFLOW_ROOT", Path(__file__).resolve().parents[1])).resolve()
+    repo = workflow_root / "repos" / "1000genome-workflow"
+    data_base = Path(os.environ.get("DATA_BASE", workflow_root / "data" / "1000genome-workflow")).resolve()
+    run_base = Path(os.environ.get("RUN_BASE", workflow_root / "runs" / "1000genome-workflow")).resolve()
+    bin_dir = repo / "bin"
+    runlog = workflow_root / "logs" / "phase6" / "1000genome-workflow_phase6.log"
 
-    os.makedirs(os.path.dirname(RUNLOG), exist_ok=True)
+    os.makedirs(runlog.parent, exist_ok=True)
 
     # Determine available CPUs
     n_cpus = len(os.sched_getaffinity(0))
     # Use at most n_cpus - 1 workers, min 2
     max_workers = max(2, min(n_cpus - 1, 8))
 
-    log("=" * 60, RUNLOG)
-    log("1000genome-workflow Phase 6 Execution", RUNLOG)
-    log(f"Available CPUs: {n_cpus}, Workers: {max_workers}", RUNLOG)
-    log("=" * 60, RUNLOG)
+    log("=" * 60, str(runlog))
+    log("1000genome-workflow Phase 6 Execution", str(runlog))
+    log(f"Workflow root: {workflow_root}", str(runlog))
+    log(f"Available CPUs: {n_cpus}, Workers: {max_workers}", str(runlog))
+    log("=" * 60, str(runlog))
 
     # Validate data
     for scale in ["small", "medium"]:
-        ddir = os.path.join(DATA_BASE, scale)
+        ddir = data_base / scale
         if not os.path.isdir(ddir):
-            log(f"ERROR: Data directory missing: {ddir}", RUNLOG)
+            log(f"ERROR: Data directory missing: {ddir}", str(runlog))
             sys.exit(1)
         total = sum(
             os.path.getsize(os.path.join(dp, f))
@@ -296,23 +297,23 @@ def main():
             if os.path.isfile(os.path.join(dp, f))
         )
         total_gb = total / (1024**3)
-        log(f"  {scale} data: {total_gb:.2f} GB", RUNLOG)
+        log(f"  {scale} data: {total_gb:.2f} GB", str(runlog))
         if total_gb > 50:
-            log(f"ERROR: {scale} data exceeds 50 GB limit", RUNLOG)
+            log(f"ERROR: {scale} data exceeds 50 GB limit", str(runlog))
             sys.exit(1)
 
     max_attempts = 3
 
     # ===== SMALL =====
-    small_csv = f"{RUN_BASE}/small/data_small.csv"
-    small_work = f"{RUN_BASE}/small/workdir_exec"
-    small_out = f"{RUN_BASE}/small/outputs"
-    small_log = f"{RUN_BASE}/small/logs"
+    small_csv = run_base / "small" / "data_small.csv"
+    small_work = run_base / "small" / "workdir_exec"
+    small_out = run_base / "small" / "outputs"
+    small_log = run_base / "small" / "logs"
     small_success = False
     small_summary = None
 
     for attempt in range(1, max_attempts + 1):
-        log(f"\n*** SMALL scale - attempt {attempt}/{max_attempts} ***", RUNLOG)
+        log(f"\n*** SMALL scale - attempt {attempt}/{max_attempts} ***", str(runlog))
         if os.path.exists(small_work):
             shutil.rmtree(small_work)
 
@@ -320,36 +321,36 @@ def main():
         # 2 chroms * 5 tasks = 10 tasks, 8 workers => ~2 batches => ~140 min
         small_success, small_summary = run_workflow(
             scale="small",
-            data_dir=f"{DATA_BASE}/small",
-            data_csv=small_csv,
-            work_dir=small_work,
-            output_dir=small_out,
-            log_dir=small_log,
-            logfile=RUNLOG,
-            bin_dir=BIN_DIR,
+            data_dir=str(data_base / "small"),
+            data_csv=str(small_csv),
+            work_dir=str(small_work),
+            output_dir=str(small_out),
+            log_dir=str(small_log),
+            logfile=str(runlog),
+            bin_dir=str(bin_dir),
             ind_jobs=5,
             timeout=14400,
             max_workers=max_workers,
         )
 
         if small_success:
-            log(f"SMALL scale succeeded on attempt {attempt}", RUNLOG)
+            log(f"SMALL scale succeeded on attempt {attempt}", str(runlog))
             break
         else:
-            log(f"SMALL scale failed on attempt {attempt}", RUNLOG)
+            log(f"SMALL scale failed on attempt {attempt}", str(runlog))
 
     # ===== MEDIUM =====
     medium_success = False
     medium_summary = None
 
     if small_success:
-        medium_csv = f"{RUN_BASE}/medium/data_medium.csv"
-        medium_work = f"{RUN_BASE}/medium/workdir_exec"
-        medium_out = f"{RUN_BASE}/medium/outputs"
-        medium_log = f"{RUN_BASE}/medium/logs"
+        medium_csv = run_base / "medium" / "data_medium.csv"
+        medium_work = run_base / "medium" / "workdir_exec"
+        medium_out = run_base / "medium" / "outputs"
+        medium_log = run_base / "medium" / "logs"
 
         for attempt in range(1, max_attempts + 1):
-            log(f"\n*** MEDIUM scale - attempt {attempt}/{max_attempts} ***", RUNLOG)
+            log(f"\n*** MEDIUM scale - attempt {attempt}/{max_attempts} ***", str(runlog))
             if os.path.exists(medium_work):
                 shutil.rmtree(medium_work)
 
@@ -359,25 +360,25 @@ def main():
             # Still tight. But with 50000 threshold (not 250000), tasks are smaller.
             medium_success, medium_summary = run_workflow(
                 scale="medium",
-                data_dir=f"{DATA_BASE}/medium",
-                data_csv=medium_csv,
-                work_dir=medium_work,
-                output_dir=medium_out,
-                log_dir=medium_log,
-                logfile=RUNLOG,
-                bin_dir=BIN_DIR,
+                data_dir=str(data_base / "medium"),
+                data_csv=str(medium_csv),
+                work_dir=str(medium_work),
+                output_dir=str(medium_out),
+                log_dir=str(medium_log),
+                logfile=str(runlog),
+                bin_dir=str(bin_dir),
                 ind_jobs=10,
                 timeout=14400,
                 max_workers=max_workers,
             )
 
             if medium_success:
-                log(f"MEDIUM scale succeeded on attempt {attempt}", RUNLOG)
+                log(f"MEDIUM scale succeeded on attempt {attempt}", str(runlog))
                 break
             else:
-                log(f"MEDIUM scale failed on attempt {attempt}", RUNLOG)
+                log(f"MEDIUM scale failed on attempt {attempt}", str(runlog))
     else:
-        log("Skipping MEDIUM scale because SMALL failed", RUNLOG)
+        log("Skipping MEDIUM scale because SMALL failed", str(runlog))
 
     # Determine final status
     if small_success and medium_success:
@@ -387,13 +388,14 @@ def main():
     else:
         status = "BOTH_FAILED"
 
-    log(f"\n{'='*60}", RUNLOG)
-    log(f"FINAL STATUS: {status}", RUNLOG)
-    log(f"{'='*60}", RUNLOG)
+    log(f"\n{'='*60}", str(runlog))
+    log(f"FINAL STATUS: {status}", str(runlog))
+    log(f"{'='*60}", str(runlog))
 
     # Write summary - both to logs and to run directory
-    summary_path = f"{WORKFLOW_ROOT}/logs/phase6/PHASE6_SUMMARY.txt"
-    run_summary_path = f"{RUN_BASE}/PHASE6_SUMMARY.txt"
+    summary_path = workflow_root / "logs" / "phase6" / "PHASE6_SUMMARY.txt"
+    run_summary_path = run_base / "PHASE6_SUMMARY.txt"
+    os.makedirs(run_base, exist_ok=True)
     with open(summary_path, "w") as f:
         f.write("=" * 60 + "\n")
         f.write("1000genome-workflow Phase 6 Summary\n")
@@ -414,15 +416,15 @@ def main():
                     f.write(f"  Failed: {s_sum['failed_tasks']}\n")
             f.write("\n")
 
-        f.write(f"Log: {RUNLOG}\n")
-        f.write(f"Small outputs: {RUN_BASE}/small/outputs/\n")
-        f.write(f"Medium outputs: {RUN_BASE}/medium/outputs/\n")
+        f.write(f"Log: {runlog}\n")
+        f.write(f"Small outputs: {run_base}/small/outputs/\n")
+        f.write(f"Medium outputs: {run_base}/medium/outputs/\n")
 
     # Copy summary to run directory
     import shutil as _shutil
     _shutil.copy2(summary_path, run_summary_path)
-    log(f"Summary written to {summary_path}", RUNLOG)
-    log(f"Summary copied to {run_summary_path}", RUNLOG)
+    log(f"Summary written to {summary_path}", str(runlog))
+    log(f"Summary copied to {run_summary_path}", str(runlog))
     return status
 
 

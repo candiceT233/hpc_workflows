@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+/usr/bin/python3 /usr/lib/python3.10/dist-packages/Pegasus/cli/pegasus-config.py "$@" |
+    sed \
+        -e "s#^PEGASUS_BIN_DIR=.*#PEGASUS_BIN_DIR=\"$SCRIPT_DIR\";#" \
+        -e "s#^PEGASUS_PYTHON_DIR=.*#PEGASUS_PYTHON_DIR=\"/usr/lib/python3.10/dist-packages\";#" \
+        -e "s#^PEGASUS_PYTHON_EXTERNALS_DIR=.*#PEGASUS_PYTHON_EXTERNALS_DIR=\"/usr/lib/python3.10/dist-packages\";#"

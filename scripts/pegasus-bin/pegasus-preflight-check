@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+exec /usr/bin/python3 /usr/lib/python3.10/dist-packages/Pegasus/cli/pegasus-preflight-check.py "$@"

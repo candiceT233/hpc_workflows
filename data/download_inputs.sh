@@ -15,8 +15,11 @@
 ###############################################################################
 set -euo pipefail
 
-DATA_ROOT="/mnt/common/mtang11/hpc_workflows/data"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORKFLOW_ROOT="${WORKFLOW_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
+DATA_ROOT="${DATA_ROOT:-$WORKFLOW_ROOT/data}"
 LOG="${DATA_ROOT}/download_inputs.log"
+mkdir -p "$DATA_ROOT"
 > "$LOG"
 
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOG"; }
@@ -125,7 +128,7 @@ download_sarek() {
     log "=== nf-core_sarek: SMALL ==="
 
     # Samplesheet
-    cp /mnt/common/mtang11/hpc_workflows/repos/nf-core_sarek/tests/csv/3.0/fastq_single.csv \
+    cp "$WORKFLOW_ROOT/repos/nf-core_sarek/tests/csv/3.0/fastq_single.csv" \
        "$S/samplesheet_test.csv" 2>/dev/null || true
 
     # FASTQ files
